@@ -10,6 +10,7 @@
 
     **Préconditions** :
         L'utilisateur a chargé un fichier CSV
+        L'utilisateur a saisit un point
 
     **Garanties en cas de succès** :
         On peut savoir a quoi correspond la donnée entrée selon le fichier CSV
