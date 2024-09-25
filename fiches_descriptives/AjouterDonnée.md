@@ -16,7 +16,7 @@
 
 **Scénario nominal** :
 
-1. L'utilisateur selectionne le bouton "Ajouter un point"
+1. L'utilisateur la fonctionnalité "Ajouter un point"
 2. Le système affiche un formulaire pour rentrer les données
 3. L'utilisateur saisit les données et valide
 4. Le système vérifie si les données sont correctement rentrées puis affiche le graphique avec le nouveau point bien visible
