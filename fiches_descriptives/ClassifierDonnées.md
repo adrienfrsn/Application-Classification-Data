@@ -8,7 +8,10 @@
 
 **Autres acteurs** : /
 
-**Préconditions** : L'utilisateur a chargé un fichier CSV
+**Préconditions** : 
+
+L'utilisateur a chargé un fichier CSV
+
 L'utilisateur a saisit un point
 
 **Garanties en cas de succès** :
