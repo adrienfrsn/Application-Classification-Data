@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataManager<E> {
+    private static final String PATH = "src/main/fr/resources/iris.csv";
     private List<E> dataList;
 
     public DataManager(List<E> dataList) {
@@ -31,10 +32,21 @@ public class DataManager<E> {
     }
 
     public void loadData(String path) {
-        // TODO Charger des données depuis un CSV (attendre TP OpenCSV)
+        try {
+            dataList = (List<E>) DataLoader.charger(path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void classifyData(E data) {
         // TODO
     }
+
+    public static void main(String[] args) {
+        DataManager<FormatDonneeBrut> dataManager = new DataManager<>();
+        dataManager.loadData(PATH);
+        System.out.println(dataManager.getDataList());
+    }
+
 }

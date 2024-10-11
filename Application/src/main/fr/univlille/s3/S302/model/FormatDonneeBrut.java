@@ -1,20 +1,18 @@
 package fr.univlille.s3.S302.model;
 
-public class Iris {
-    private double sepalLength;
-    private double sepalWidth;
-    private double petalLength;
-    private double petalWidth;
-    private String variety;
-    private Coordonnee coordonnee;
+import com.opencsv.bean.CsvBindByName;
 
-    public Iris(double sepalLength, double sepalWidth, double petalLength, double petalWidth, String variety) {
-        this.sepalLength = sepalLength;
-        this.sepalWidth = sepalWidth;
-        this.petalLength = petalLength;
-        this.petalWidth = petalWidth;
-        this.variety = variety;
-    }
+public class FormatDonneeBrut {
+    @CsvBindByName(column = "sepal.length")
+    private double sepalLength;
+    @CsvBindByName(column = "sepal.width")
+    private double sepalWidth;
+    @CsvBindByName(column = "petal.length")
+    private double petalLength;
+    @CsvBindByName(column = "petal.width")
+    private double petalWidth;
+    @CsvBindByName(column = "variety")
+    private String species;
 
     public double getSepalLength() {
         return sepalLength;
@@ -33,7 +31,7 @@ public class Iris {
     }
 
     public String getSpecies() {
-        return variety;
+        return species;
     }
 
     @Override
@@ -43,7 +41,7 @@ public class Iris {
                 ", sepalWidth=" + sepalWidth +
                 ", petalLength=" + petalLength +
                 ", petalWidth=" + petalWidth +
-                ", species='" + variety + '\'' +
+                ", species='" + species + '\'' +
                 '}';
     }
 }
