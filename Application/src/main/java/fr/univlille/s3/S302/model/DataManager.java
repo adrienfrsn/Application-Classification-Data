@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataManager<E> {
-    private static final String PATH = "src/main/fr/resources/iris.csv";
+    private static final String PATH = "src/main/java/fr/resources/iris.csv";
     private List<E> dataList;
 
     public DataManager(List<E> dataList) {
