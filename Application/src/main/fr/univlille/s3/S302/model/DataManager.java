@@ -1,4 +1,4 @@
-package model;
+package fr.univlille.s3.S302.model;
 
 import java.util.ArrayList;
 import java.util.List;
