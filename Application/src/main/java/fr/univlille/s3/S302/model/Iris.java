@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Iris implements Data {
-    private double sepalLength;
-    private double sepalWidth;
-    private double petalLength;
-    private double petalWidth;
+    private final double sepalLength;
+    private final double sepalWidth;
+    private final double petalLength;
+    private final double petalWidth;
     private String variety;
     private Coordonnee coordonnee;
     private Pair<String, String> choosenAttributes;
