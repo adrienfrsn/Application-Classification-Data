@@ -54,8 +54,8 @@ public class DataController {
 
         updateCategories();
 
-        xCategory.setUserData(xCategory.getItems().get(0));
-        yCategory.setUserData(yCategory.getItems().get(1));
+        xCategory.setValue(xCategory.getItems().get(0));
+        yCategory.setValue(yCategory.getItems().get(1));
 
         categoryBtn.setOnAction(event -> {
             for (Pair<XYChart.Data<String, Number>, Data> d: data) {
