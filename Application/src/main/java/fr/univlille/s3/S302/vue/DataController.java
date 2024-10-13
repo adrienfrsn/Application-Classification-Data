@@ -56,12 +56,16 @@ public class DataController {
 
         xCategory.setValue(data.get(0).getValue().getChoosenAttributesKey().getKey());
         yCategory.setValue(data.get(0).getValue().getChoosenAttributesKey().getValue());
+        chart.getXAxis().setLabel(xCategory.getValue());
+        chart.getYAxis().setLabel(yCategory.getValue());
 
         categoryBtn.setOnAction(event -> {
             for (Pair<XYChart.Data<String, Number>, Data> d: data) {
                 Data f = d.getValue();
                 f.setChoosenAttributesKey(new Pair<>(xCategory.getValue(), yCategory.getValue()));
             }
+            chart.getXAxis().setLabel(xCategory.getValue());
+            chart.getYAxis().setLabel(yCategory.getValue());
             update();
         });
 
