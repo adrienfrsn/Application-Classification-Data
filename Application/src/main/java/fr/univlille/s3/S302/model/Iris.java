@@ -1,12 +1,18 @@
 package fr.univlille.s3.S302.model;
 
-public class Iris {
+import javafx.util.Pair;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class Iris implements Data {
     private double sepalLength;
     private double sepalWidth;
     private double petalLength;
     private double petalWidth;
     private String variety;
     private Coordonnee coordonnee;
+    private Pair<String, String> choosenAttributes;
 
     public Iris(double sepalLength, double sepalWidth, double petalLength, double petalWidth, String variety) {
         this.sepalLength = sepalLength;
@@ -14,6 +20,7 @@ public class Iris {
         this.petalLength = petalLength;
         this.petalWidth = petalWidth;
         this.variety = variety;
+        this.choosenAttributes = new Pair<>("sepalLength", "sepalWidth");
     }
 
     public double getSepalLength() {
@@ -45,5 +52,31 @@ public class Iris {
                 ", petalWidth=" + petalWidth +
                 ", species='" + variety + '\'' +
                 '}';
+    }
+
+    @Override
+    public Map<String, Number> getattributes() {
+        Map<String, Number> attributes = new HashMap<>();
+        attributes.put("sepalLength", sepalLength);
+        attributes.put("sepalWidth", sepalWidth);
+        attributes.put("petalLength", petalLength);
+        attributes.put("petalWidth", petalWidth);
+        return attributes;
+    }
+
+    @Override
+    public String getCategory() {
+        return variety;
+    }
+
+    @Override
+    public void setCategory(String category) {
+        variety = category;
+    }
+
+    @Override
+    public Pair<String, Number> getChoosenAttributes() {
+        Map<String, Number> attributes = this.getattributes();
+        return new Pair<>(attributes.get(choosenAttributes.getKey())+"", attributes.get(choosenAttributes.getValue()));
     }
 }

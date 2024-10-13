@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataManager<E> {
+public class DataManager<E extends Data> {
     public static final String PATH = "iris.csv";
     private List<E> dataList;
 
@@ -34,7 +34,11 @@ public class DataManager<E> {
 
     public void loadData(String path) {
         try {
-            dataList = (List<E>) DataLoader.charger(path);
+            List<FormatDonneeBrut> tmp = DataLoader.charger(path);
+            for (FormatDonneeBrut f : tmp) {
+                dataList.add((E) FormatDonneeBrut.createObject(f));
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
