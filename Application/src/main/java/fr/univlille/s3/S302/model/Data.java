@@ -3,6 +3,7 @@ package fr.univlille.s3.S302.model;
 import javafx.util.Pair;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 public interface Data {
 
@@ -16,7 +17,7 @@ public interface Data {
 
     public Pair<String, String> getChoosenAttributesKey();
 
-    public void setChoosenAttributesKey(Pair<String, String> choosenAttributes);
+    public void setChoosenAttributesKey(Pair<String, String> choosenAttributes) throws IllegalArgumentException, NoSuchElementException;
 
 
 }

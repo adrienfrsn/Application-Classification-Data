@@ -7,7 +7,9 @@ import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.stage.Popup;
 import javafx.util.Pair;
 
 
@@ -60,17 +62,40 @@ public class DataController {
         chart.getYAxis().setLabel(yCategory.getValue());
 
         categoryBtn.setOnAction(event -> {
-            for (Pair<XYChart.Data<String, Number>, Data> d: data) {
-                Data f = d.getValue();
-                f.setChoosenAttributesKey(new Pair<>(xCategory.getValue(), yCategory.getValue()));
+            try {
+                for (Pair<XYChart.Data<String, Number>, Data> d: data) {
+                    Data f = d.getValue();
+                    f.setChoosenAttributesKey(new Pair<>(xCategory.getValue(), yCategory.getValue()));
+                }
+                chart.getXAxis().setLabel(xCategory.getValue());
+                chart.getYAxis().setLabel(yCategory.getValue());
+                update();
+
+            } catch (IllegalArgumentException ile) {
+                Popup popup = genErrorPopup(ile.getMessage());
+                popup.show(chart.getScene().getWindow());
+
+
+            } catch (NoSuchElementException nse) {
+                Popup popup = genErrorPopup(nse.getMessage());
+                popup.show(chart.getScene().getWindow());
             }
-            chart.getXAxis().setLabel(xCategory.getValue());
-            chart.getYAxis().setLabel(yCategory.getValue());
-            update();
+
         });
 
 
 
+    }
+
+    private Popup genErrorPopup(String message) {
+        Popup popup = new Popup();
+        Label label = new Label("Erreur: \n" + message);
+        label.setStyle(" -fx-background-color: white; -fx-border-radius: 10; -fx-padding: 10; -fx-border-color: red; -fx-border-width: 2;");
+        label.setMinHeight(50);
+        label.setMinWidth(200);
+        popup.getContent().add(label);
+        popup.setAutoHide(true);
+        return popup;
     }
 
     private void update() {

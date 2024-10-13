@@ -4,6 +4,7 @@ import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 public class Iris implements Data {
     private final double sepalLength;
@@ -82,17 +83,13 @@ public class Iris implements Data {
 
 
 
-    public void setChoosenAttributesKey(Pair<String, String> ch) {
+    public void setChoosenAttributesKey(Pair<String, String> ch) throws IllegalArgumentException, NoSuchElementException {
         if (ch.getKey().equals(ch.getValue())) {
-            System.err.println("Les attributs choisis doivent être différents");
-            return;
-            //throw new IllegalArgumentException("Les attributs choisis doivent être différents");
+            throw new IllegalArgumentException("Les attributs choisis doivent être différents");
         }
         Map<String, Number> attributes = this.getattributes();
         if (!attributes.containsKey(ch.getKey()) || !attributes.containsKey(ch.getValue())) {
-            System.err.println("Les attributs choisis ne sont pas valides");
-            return;
-            //throw new IllegalArgumentException("Les attributs choisis ne sont pas valides");
+            throw new NoSuchElementException("Les attributs choisis ne sont pas valides");
         }
         this.choosenAttributes = ch;
     }
