@@ -54,13 +54,13 @@ public class DataController {
 
         updateCategories();
 
-        xCategory.setValue(xCategory.getItems().get(0));
-        yCategory.setValue(yCategory.getItems().get(1));
+        xCategory.setValue(data.get(0).getValue().getChoosenAttributesKey().getKey());
+        yCategory.setValue(data.get(0).getValue().getChoosenAttributesKey().getValue());
 
         categoryBtn.setOnAction(event -> {
             for (Pair<XYChart.Data<String, Number>, Data> d: data) {
                 Data f = d.getValue();
-                f.setChoosenAttributes(new Pair<>(xCategory.getValue(), yCategory.getValue()));
+                f.setChoosenAttributesKey(new Pair<>(xCategory.getValue(), yCategory.getValue()));
             }
             update();
         });

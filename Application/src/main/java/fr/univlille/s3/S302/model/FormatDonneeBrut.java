@@ -78,8 +78,12 @@ public class FormatDonneeBrut implements Data {
     }
 
     @Override
-    public void setChoosenAttributes(Pair<String, String> choosenAttributes) {
+    public void setChoosenAttributesKey(Pair<String, String> choosenAttributes) {
         // Do nothing
+    }
+
+    public Pair<String, String> getChoosenAttributesKey() {
+        return new Pair<>("", "");
     }
 
 

@@ -14,5 +14,9 @@ public interface Data {
 
     public Pair<String, Number> getChoosenAttributes();
 
-    public void setChoosenAttributes(Pair<String, String> choosenAttributes);
+    public Pair<String, String> getChoosenAttributesKey();
+
+    public void setChoosenAttributesKey(Pair<String, String> choosenAttributes);
+
+
 }

@@ -80,7 +80,9 @@ public class Iris implements Data {
         return new Pair<>(attributes.get(choosenAttributes.getKey())+"", attributes.get(choosenAttributes.getValue()));
     }
 
-    public void setChoosenAttributes(Pair<String, String> ch) {
+
+
+    public void setChoosenAttributesKey(Pair<String, String> ch) {
         if (ch.getKey().equals(ch.getValue())) {
             System.err.println("Les attributs choisis doivent être différents");
             return;
@@ -93,5 +95,9 @@ public class Iris implements Data {
             //throw new IllegalArgumentException("Les attributs choisis ne sont pas valides");
         }
         this.choosenAttributes = ch;
+    }
+
+    public Pair<String, String> getChoosenAttributesKey() {
+        return new Pair<>(choosenAttributes.getKey(), choosenAttributes.getValue());
     }
 }
