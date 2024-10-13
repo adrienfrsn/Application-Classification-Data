@@ -1,10 +1,11 @@
 package fr.univlille.s3.S302.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataManager<E> {
-    private static final String PATH = "src/main/java/fr/resources/iris.csv";
+    public static final String PATH = "iris.csv";
     private List<E> dataList;
 
     public DataManager(List<E> dataList) {
@@ -34,7 +35,7 @@ public class DataManager<E> {
     public void loadData(String path) {
         try {
             dataList = (List<E>) DataLoader.charger(path);
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

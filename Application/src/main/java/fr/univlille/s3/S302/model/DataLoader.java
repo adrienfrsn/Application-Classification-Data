@@ -1,8 +1,9 @@
 package fr.univlille.s3.S302.model;
 
+import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -10,10 +11,27 @@ import java.util.List;
 public class DataLoader {
 
     public static List<FormatDonneeBrut> charger(String fileName) throws IOException {
-        return new CsvToBeanBuilder<FormatDonneeBrut>(Files.newBufferedReader(Paths.get(fileName)))
-                .withSeparator(',')
-                .withType(FormatDonneeBrut.class)
-                .build().parse();
+        InputStream input = DataLoader.class.getResourceAsStream(fileName);
+        if (input == null) {
+            throw new FileNotFoundException("Fichier non trouvé");
+        }
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(input))) {
+
+            // Création de CsvToBeanBuilder
+            CsvToBean<FormatDonneeBrut> csvToBean = new CsvToBeanBuilder<FormatDonneeBrut>(reader)
+                    .withSeparator(',')
+                    .withType(FormatDonneeBrut.class)
+                    .build();
+
+            List<FormatDonneeBrut> records = csvToBean.parse();
+            return records;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        throw new FileNotFoundException("Fichier non trouvé");
+
     }
 
     public static Iris createObject(FormatDonneeBrut f) {
