@@ -73,8 +73,13 @@ public class FormatDonneeBrut implements Data {
     }
 
     @Override
-    public Pair<String, Number> getChoosenAttributes() {
-        return new Pair<>("sepalLength", sepalLength);
+    public Pair<String, Number > getChoosenAttributes() {
+        return new Pair<>("sepalLength", 1);
+    }
+
+    @Override
+    public void setChoosenAttributes(Pair<String, String> choosenAttributes) {
+        // Do nothing
     }
 
 

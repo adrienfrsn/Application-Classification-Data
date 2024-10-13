@@ -5,6 +5,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tooltip;
 import javafx.util.Pair;
 
@@ -16,6 +18,15 @@ public class DataController {
 
     @FXML
     ScatterChart<String , Number> chart;
+    
+    @FXML
+    ComboBox<String> xCategory;
+    
+    @FXML
+    ComboBox<String> yCategory;
+
+    @FXML
+    private Button categoryBtn;
 
     List<Pair<XYChart.Data<String, Number>, Data>> data ;
 
@@ -31,23 +42,39 @@ public class DataController {
         chart.setTitle("Scatter Chart");
         dataManager.loadData("iris.csv");
 
-
-        // set limit to the chart dynamicaly
         chart.getXAxis().setAutoRanging(true);
         chart.getYAxis().setAutoRanging(true);
         chart.setAnimated(false);
 
         XYChart.Series<String, Number> series = new XYChart.Series<>();
 
-        for (Data f : dataManager.getDataList()) {
-            Pair<String, Number> choosenAttributes = f.getChoosenAttributes();
-            Coordonnee c = new Coordonnee(Double.parseDouble(choosenAttributes.getKey()), choosenAttributes.getValue().doubleValue());
-            XYChart.Data<String , Number> node = new XYChart.Data<>(choosenAttributes.getKey(), choosenAttributes.getValue());
-            data.add(new Pair<>(node, f));
-            series.getData().add(node);
-        }
-        chart.getData().add(series);
+        constructChart(series);
 
+        setChartStyle();
+
+        updateCategories();
+
+        xCategory.setUserData(xCategory.getItems().get(0));
+        yCategory.setUserData(yCategory.getItems().get(1));
+
+        categoryBtn.setOnAction(event -> {
+            for (Pair<XYChart.Data<String, Number>, Data> d: data) {
+                Data f = d.getValue();
+                f.setChoosenAttributes(new Pair<>(xCategory.getValue(), yCategory.getValue()));
+            }
+            update();
+        });
+
+
+
+    }
+
+    private void update() {
+        updateChart();
+        setChartStyle();
+    }
+
+    private void setChartStyle() {
         for (final XYChart.Series<String, Number> s : chart.getData()) {
             for (final XYChart.Data<String, Number> data : s.getData()) {
                 Data d = getNode(data);
@@ -66,12 +93,37 @@ public class DataController {
                 });
 
                 setNodeColor(data.getNode(), d.getCategory());
-
             }
         }
+    }
 
+    private void updateChart() {
+        chart.getData().clear();
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        List<Pair<XYChart.Data<String, Number>, Data>> tmp = new ArrayList<>(this.data);
+        for (Pair<XYChart.Data<String, Number>, Data> d : tmp) {
+            Data f = d.getValue();
+            Pair<String, Number> choosenAttributes = f.getChoosenAttributes();
+            XYChart.Data<String , Number> node = new XYChart.Data<>(choosenAttributes.getKey(), choosenAttributes.getValue());
+            series.getData().add(node);
+            data.remove(d);
+            data.add(new Pair<>(node, f));
 
+        }
+        chart.getData().add(series);
 
+    }
+
+    private void constructChart(XYChart.Series<String, Number> series) {
+        chart.getData().clear();
+        for (Data f : dataManager.getDataList()) {
+            Pair<String, Number> choosenAttributes = f.getChoosenAttributes();
+            Coordonnee c = new Coordonnee(Double.parseDouble(choosenAttributes.getKey()), choosenAttributes.getValue().doubleValue());
+            XYChart.Data<String , Number> node = new XYChart.Data<>(choosenAttributes.getKey(), choosenAttributes.getValue());
+            data.add(new Pair<>(node, f));
+            series.getData().add(node);
+        }
+        chart.getData().add(series);
     }
 
     private Data getNode(XYChart.Data<String, Number> data) {
@@ -81,6 +133,17 @@ public class DataController {
             }
         }
         return null;
+    }
+    
+    private Set<String> getAttributes() {
+       return  this.dataManager.getAttributes();
+    }
+    
+    private void updateCategories() {
+        xCategory.getItems().clear();
+        yCategory.getItems().clear();
+        xCategory.getItems().addAll(getAttributes());
+        yCategory.getItems().addAll(getAttributes());
     }
 
     public void setNodeColor(Node node, String category) {
@@ -93,6 +156,10 @@ public class DataController {
         }
 
         node.setStyle("-fx-background-color: " + categorieColor.get(category) + ";");
+    }
+
+    public void addNode(Data data) {
+        // TODO
     }
 
 }

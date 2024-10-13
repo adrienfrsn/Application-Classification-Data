@@ -12,7 +12,7 @@ public class Iris implements Data {
     private final double petalWidth;
     private String variety;
     private Coordonnee coordonnee;
-    private Pair<String, String> choosenAttributes;
+    public  Pair<String, String> choosenAttributes;
 
     public Iris(double sepalLength, double sepalWidth, double petalLength, double petalWidth, String variety) {
         this.sepalLength = sepalLength;
@@ -78,5 +78,20 @@ public class Iris implements Data {
     public Pair<String, Number> getChoosenAttributes() {
         Map<String, Number> attributes = this.getattributes();
         return new Pair<>(attributes.get(choosenAttributes.getKey())+"", attributes.get(choosenAttributes.getValue()));
+    }
+
+    public void setChoosenAttributes(Pair<String, String> ch) {
+        if (ch.getKey().equals(ch.getValue())) {
+            System.err.println("Les attributs choisis doivent être différents");
+            return;
+            //throw new IllegalArgumentException("Les attributs choisis doivent être différents");
+        }
+        Map<String, Number> attributes = this.getattributes();
+        if (!attributes.containsKey(ch.getKey()) || !attributes.containsKey(ch.getValue())) {
+            System.err.println("Les attributs choisis ne sont pas valides");
+            return;
+            //throw new IllegalArgumentException("Les attributs choisis ne sont pas valides");
+        }
+        this.choosenAttributes = ch;
     }
 }

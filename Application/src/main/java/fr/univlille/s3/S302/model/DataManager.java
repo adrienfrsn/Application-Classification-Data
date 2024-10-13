@@ -2,7 +2,9 @@ package fr.univlille.s3.S302.model;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DataManager<E extends Data> {
     public static final String PATH = "iris.csv";
@@ -30,6 +32,10 @@ public class DataManager<E extends Data> {
 
     public void removeData(E data) {
         dataList.remove(data);
+    }
+
+    public Set<String> getAttributes() {
+        return dataList.get(0).getattributes().keySet();
     }
 
     public void loadData(String path) {

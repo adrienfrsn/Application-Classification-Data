@@ -13,4 +13,6 @@ public interface Data {
     public void setCategory(String category);
 
     public Pair<String, Number> getChoosenAttributes();
+
+    public void setChoosenAttributes(Pair<String, String> choosenAttributes);
 }
