@@ -1,8 +1,8 @@
 package fr.univlille.s3.S302.model;
 
 public class Coordonnee {
-    private double x;
-    private double y;
+    private final double x;
+    private final double y;
 
     public Coordonnee(double x, double y) {
         this.x = x;

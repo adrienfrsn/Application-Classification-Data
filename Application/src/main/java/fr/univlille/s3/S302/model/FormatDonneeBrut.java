@@ -2,7 +2,10 @@ package fr.univlille.s3.S302.model;
 
 import com.opencsv.bean.CsvBindByName;
 
-public class FormatDonneeBrut {
+import java.util.HashMap;
+import java.util.Map;
+
+public class FormatDonneeBrut implements Data {
     @CsvBindByName(column = "sepal.length")
     private double sepalLength;
     @CsvBindByName(column = "sepal.width")
@@ -13,6 +16,10 @@ public class FormatDonneeBrut {
     private double petalWidth;
     @CsvBindByName(column = "variety")
     private String species;
+
+    public static Data createObject(FormatDonneeBrut f) {
+        return new Iris(f.getSepalLength(), f.getSepalWidth(), f.getPetalLength(), f.getPetalWidth(), f.getSpecies());
+    }
 
     public double getSepalLength() {
         return sepalLength;
@@ -36,12 +43,28 @@ public class FormatDonneeBrut {
 
     @Override
     public String toString() {
-        return "Iris{" +
-                "sepalLength=" + sepalLength +
-                ", sepalWidth=" + sepalWidth +
-                ", petalLength=" + petalLength +
-                ", petalWidth=" + petalWidth +
-                ", species='" + species + '\'' +
-                '}';
+        return "Iris{" + "sepalLength=" + sepalLength + ", sepalWidth=" + sepalWidth + ", petalLength=" + petalLength + ", petalWidth=" + petalWidth + ", species='" + species + '\'' + '}';
     }
+
+    @Override
+    public Map<String, Number> getattributes() {
+        Map<String, Number> attributes = new HashMap<>();
+        attributes.put("sepalLength", sepalLength);
+        attributes.put("sepalWidth", sepalWidth);
+        attributes.put("petalLength", petalLength);
+        attributes.put("petalWidth", petalWidth);
+        return attributes;
+    }
+
+    @Override
+    public String getCategory() {
+        return species;
+    }
+
+    @Override
+    public void setCategory(String category) {
+        species = category;
+    }
+
+
 }
