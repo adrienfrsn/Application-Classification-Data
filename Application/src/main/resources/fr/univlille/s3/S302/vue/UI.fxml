@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.gluonhq.charm.glisten.control.TextField?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.ScatterChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.univlille.s3.S302.vue.DataController">
+   <left>
+      <VBox prefHeight="400.0" prefWidth="150.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Ajouter un point" />
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Label prefHeight="18.0" prefWidth="58.0" text="Val X" />
+                  <TextField prefWidth="117.0" />
+               </children>
+            </HBox>
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Label prefHeight="18.0" prefWidth="58.0" text="Val Y" />
+                  <TextField />
+               </children>
+            </HBox>
+            <Button fx:id="addDataBtn" contentDisplay="CENTER" mnemonicParsing="false" text="Ajouter donnée" />
+            <AnchorPane prefHeight="106.0" prefWidth="162.0">
+               <children>
+                  <Button fx:id="categoryBtn" layoutX="57.0" layoutY="93.0" mnemonicParsing="false" text="Valider" />
+                  <HBox layoutX="11.0" layoutY="18.0">
+                     <children>
+                        <Label prefHeight="18.0" prefWidth="52.0" text="X Axis : " />
+                        <ComboBox prefHeight="28.0" prefWidth="98.0" fx:id="xCategory" />
+                     </children>
+                  </HBox>
+                  <HBox layoutX="9.0" layoutY="57.0">
+                     <children>
+                        <Label prefHeight="18.0" prefWidth="52.0" text="Y Axis : " />
+                        <ComboBox fx:id="yCategory" prefHeight="28.0" prefWidth="102.0" />
+                     </children>
+                  </HBox>
+               </children>
+            </AnchorPane>
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <ScatterChart fx:id="chart" BorderPane.alignment="CENTER">
+        <xAxis>
+          <CategoryAxis side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT" />
+        </yAxis>
+      </ScatterChart>
+   </center>
+</BorderPane>

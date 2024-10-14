@@ -1,10 +1,16 @@
 package fr.univlille.s3.S302.model;
 
-public class Iris {
-    private double sepalLength;
-    private double sepalWidth;
-    private double petalLength;
-    private double petalWidth;
+import javafx.util.Pair;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class Iris implements Data {
+    private final double sepalLength;
+    private final double sepalWidth;
+    private final double petalLength;
+    private final double petalWidth;
+    public Pair<String, String> choosenAttributes;
     private String variety;
     private Coordonnee coordonnee;
 
@@ -14,6 +20,7 @@ public class Iris {
         this.petalLength = petalLength;
         this.petalWidth = petalWidth;
         this.variety = variety;
+        this.choosenAttributes = new Pair<>("sepalLength", "sepalWidth");
     }
 
     public double getSepalLength() {
@@ -46,4 +53,25 @@ public class Iris {
                 ", species='" + variety + '\'' +
                 '}';
     }
+
+    @Override
+    public Map<String, Number> getattributes() {
+        Map<String, Number> attributes = new HashMap<>();
+        attributes.put("sepalLength", sepalLength);
+        attributes.put("sepalWidth", sepalWidth);
+        attributes.put("petalLength", petalLength);
+        attributes.put("petalWidth", petalWidth);
+        return attributes;
+    }
+
+    @Override
+    public String getCategory() {
+        return variety;
+    }
+
+    @Override
+    public void setCategory(String category) {
+        variety = category;
+    }
+
 }
