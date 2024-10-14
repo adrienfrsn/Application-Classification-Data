@@ -4,16 +4,15 @@ import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 public class Iris implements Data {
     private final double sepalLength;
     private final double sepalWidth;
     private final double petalLength;
     private final double petalWidth;
+    public Pair<String, String> choosenAttributes;
     private String variety;
     private Coordonnee coordonnee;
-    public  Pair<String, String> choosenAttributes;
 
     public Iris(double sepalLength, double sepalWidth, double petalLength, double petalWidth, String variety) {
         this.sepalLength = sepalLength;
@@ -75,26 +74,4 @@ public class Iris implements Data {
         variety = category;
     }
 
-    @Override
-    public Pair<String, Number> getChoosenAttributes() {
-        Map<String, Number> attributes = this.getattributes();
-        return new Pair<>(attributes.get(choosenAttributes.getKey())+"", attributes.get(choosenAttributes.getValue()));
-    }
-
-
-
-    public void setChoosenAttributesKey(Pair<String, String> ch) throws IllegalArgumentException, NoSuchElementException {
-        if (ch.getKey().equals(ch.getValue())) {
-            throw new IllegalArgumentException("Les attributs choisis doivent être différents");
-        }
-        Map<String, Number> attributes = this.getattributes();
-        if (!attributes.containsKey(ch.getKey()) || !attributes.containsKey(ch.getValue())) {
-            throw new NoSuchElementException("Les attributs choisis ne sont pas valides");
-        }
-        this.choosenAttributes = ch;
-    }
-
-    public Pair<String, String> getChoosenAttributesKey() {
-        return new Pair<>(choosenAttributes.getKey(), choosenAttributes.getValue());
-    }
 }

@@ -4,14 +4,9 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-
-import static java.lang.System.exit;
 
 /**
  * JavaFX App
@@ -20,15 +15,7 @@ public class App extends Application {
 
     private static Scene scene;
 
-    @Override
-    public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("UI"), 640, 480);
-        stage.setScene(scene);
-        stage.show();
-
-    }
-
-    private static Parent loadFXML(String fxml) throws IOException {
+    static Parent loadFXML(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();
     }
@@ -37,10 +24,17 @@ public class App extends Application {
         scene.setRoot(loadFXML(fxml));
     }
 
-    
-
     public static void main(String[] args) {
         launch();
+    }
+
+    @Override
+    public void start(Stage stage) throws IOException {
+        scene = new Scene(loadFXML("UI"), 640, 480);
+        stage.setScene(scene);
+        stage.show();
+
+
     }
 
 }

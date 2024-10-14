@@ -2,13 +2,14 @@ package fr.univlille.s3.S302.model;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class DataManager<E extends Data> {
+public class DataManager<E extends Data> implements Observable<E> {
     public static final String PATH = "iris.csv";
+    public static DataManager<Data> instance = new DataManager<>();
     private List<E> dataList;
+    private List<Observer> observers;
 
     public DataManager(List<E> dataList) {
         this.dataList = dataList;
@@ -16,6 +17,14 @@ public class DataManager<E extends Data> {
 
     public DataManager() {
         this(new ArrayList<>());
+        this.observers = new ArrayList<>();
+        this.loadData(PATH);
+    }
+
+    public static void main(String[] args) {
+        DataManager<FormatDonneeBrut> dataManager = new DataManager<>();
+        dataManager.loadData(PATH);
+        System.out.println(dataManager.getDataList());
     }
 
     public List<E> getDataList() {
@@ -28,6 +37,7 @@ public class DataManager<E extends Data> {
 
     public void addData(E data) {
         dataList.add(data);
+        notifyAllObservers();
     }
 
     public void removeData(E data) {
@@ -54,10 +64,24 @@ public class DataManager<E extends Data> {
         // TODO
     }
 
-    public static void main(String[] args) {
-        DataManager<FormatDonneeBrut> dataManager = new DataManager<>();
-        dataManager.loadData(PATH);
-        System.out.println(dataManager.getDataList());
+    @Override
+    public void attach(Observer<E> ob) {
+        this.observers.add(ob);
     }
 
+    @Override
+    public void notifyAllObservers(E elt) {
+        ArrayList tmp = new ArrayList<>(this.observers);
+        for (Object ob : tmp) {
+            if (ob instanceof Observer) ((Observer<E>) ob).update(this, elt);
+        }
+    }
+
+    @Override
+    public void notifyAllObservers() {
+        ArrayList tmp = new ArrayList<>(this.observers);
+        for (Object ob : tmp) {
+            if (ob instanceof Observer) ((Observer<E>) ob).update(this);
+        }
+    }
 }

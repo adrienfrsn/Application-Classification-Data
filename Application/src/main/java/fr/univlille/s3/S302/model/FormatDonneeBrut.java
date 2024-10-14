@@ -1,7 +1,7 @@
 package fr.univlille.s3.S302.model;
 
 import com.opencsv.bean.CsvBindByName;
-import javafx.util.Pair;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +16,10 @@ public class FormatDonneeBrut implements Data {
     private double petalWidth;
     @CsvBindByName(column = "variety")
     private String species;
+
+    public static Data createObject(FormatDonneeBrut f) {
+        return new Iris(f.getSepalLength(), f.getSepalWidth(), f.getPetalLength(), f.getPetalWidth(), f.getSpecies());
+    }
 
     public double getSepalLength() {
         return sepalLength;
@@ -39,17 +43,7 @@ public class FormatDonneeBrut implements Data {
 
     @Override
     public String toString() {
-        return "Iris{" +
-                "sepalLength=" + sepalLength +
-                ", sepalWidth=" + sepalWidth +
-                ", petalLength=" + petalLength +
-                ", petalWidth=" + petalWidth +
-                ", species='" + species + '\'' +
-                '}';
-    }
-
-    public static Data createObject(FormatDonneeBrut f) {
-        return new Iris(f.getSepalLength(), f.getSepalWidth(), f.getPetalLength(), f.getPetalWidth(), f.getSpecies());
+        return "Iris{" + "sepalLength=" + sepalLength + ", sepalWidth=" + sepalWidth + ", petalLength=" + petalLength + ", petalWidth=" + petalWidth + ", species='" + species + '\'' + '}';
     }
 
     @Override
@@ -71,21 +65,6 @@ public class FormatDonneeBrut implements Data {
     public void setCategory(String category) {
         species = category;
     }
-
-    @Override
-    public Pair<String, Number > getChoosenAttributes() {
-        return new Pair<>("sepalLength", 1);
-    }
-
-    @Override
-    public void setChoosenAttributesKey(Pair<String, String> choosenAttributes) {
-        // Do nothing
-    }
-
-    public Pair<String, String> getChoosenAttributesKey() {
-        return new Pair<>("", "");
-    }
-
 
 
 }

@@ -1,5 +1,7 @@
 package fr.univlille.s3.S302.vue;
 
+import fr.univlille.s3.S302.model.Observable;
+import fr.univlille.s3.S302.model.Observer;
 import fr.univlille.s3.S302.model.*;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -12,63 +14,59 @@ import javafx.scene.control.Tooltip;
 import javafx.stage.Popup;
 import javafx.util.Pair;
 
-
 import java.util.*;
 
-public class DataController {
+public class DataController implements Observer<Data> {
 
 
+    private final Map<String, String> categorieColor = new HashMap<>();
     @FXML
-    ScatterChart<String , Number> chart;
-    
+    ScatterChart<String, Number> chart;
     @FXML
     ComboBox<String> xCategory;
-    
     @FXML
     ComboBox<String> yCategory;
-
+    List<Pair<XYChart.Data<String, Number>, Data>> data;
+    DataManager<Data> dataManager = DataManager.instance;
+    Pair<String, String> choosenAttributes;
     @FXML
     private Button categoryBtn;
-
-    List<Pair<XYChart.Data<String, Number>, Data>> data ;
-
-    private Map<String, String> categorieColor = new HashMap<>();
-
-    DataManager<Data> dataManager = new DataManager<>();
+    @FXML
+    private Button addDataBtn;
 
     @FXML
     public void initialize() {
+
         data = new ArrayList<>();
         categorieColor.put("Unknown", "black");
 
         chart.setTitle("Scatter Chart");
-        dataManager.loadData("iris.csv");
 
         chart.getXAxis().setAutoRanging(true);
         chart.getYAxis().setAutoRanging(true);
         chart.setAnimated(false);
 
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-
-        constructChart(series);
-
-        setChartStyle();
+        dataManager.attach(this);
 
         updateCategories();
-
-        xCategory.setValue(data.get(0).getValue().getChoosenAttributesKey().getKey());
-        yCategory.setValue(data.get(0).getValue().getChoosenAttributesKey().getValue());
+        Set<String> attributes = dataManager.getAttributes();
+        Iterator<String> it = attributes.iterator();
+        xCategory.setValue(it.next());
+        yCategory.setValue(it.next());
         chart.getXAxis().setLabel(xCategory.getValue());
         chart.getYAxis().setLabel(yCategory.getValue());
 
+        choosenAttributes = new Pair<>(xCategory.getValue(), yCategory.getValue());
+
+        constructChart();
+
+        setChartStyle();
+
         categoryBtn.setOnAction(event -> {
             try {
-                for (Pair<XYChart.Data<String, Number>, Data> d: data) {
-                    Data f = d.getValue();
-                    f.setChoosenAttributesKey(new Pair<>(xCategory.getValue(), yCategory.getValue()));
-                }
                 chart.getXAxis().setLabel(xCategory.getValue());
                 chart.getYAxis().setLabel(yCategory.getValue());
+                choosenAttributes = new Pair<>(xCategory.getValue(), yCategory.getValue());
                 update();
 
             } catch (IllegalArgumentException ile) {
@@ -82,7 +80,6 @@ public class DataController {
             }
 
         });
-
 
 
     }
@@ -126,14 +123,19 @@ public class DataController {
         }
     }
 
+    private Pair<String, Number> getNodeXY(Data f) {
+        Map<String, Number> attributes = f.getattributes();
+        return new Pair<>(attributes.get(choosenAttributes.getKey()).toString(), attributes.get(choosenAttributes.getValue()));
+    }
+
     private void updateChart() {
         chart.getData().clear();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         List<Pair<XYChart.Data<String, Number>, Data>> tmp = new ArrayList<>(this.data);
         for (Pair<XYChart.Data<String, Number>, Data> d : tmp) {
             Data f = d.getValue();
-            Pair<String, Number> choosenAttributes = f.getChoosenAttributes();
-            XYChart.Data<String , Number> node = new XYChart.Data<>(choosenAttributes.getKey(), choosenAttributes.getValue());
+            Pair<String, Number> choosenAttributes = getNodeXY(f);
+            XYChart.Data<String, Number> node = new XYChart.Data<>(choosenAttributes.getKey(), choosenAttributes.getValue());
             series.getData().add(node);
             data.remove(d);
             data.add(new Pair<>(node, f));
@@ -143,12 +145,13 @@ public class DataController {
 
     }
 
-    private void constructChart(XYChart.Series<String, Number> series) {
+    private void constructChart() {
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
         chart.getData().clear();
         for (Data f : dataManager.getDataList()) {
-            Pair<String, Number> choosenAttributes = f.getChoosenAttributes();
+            Pair<String, Number> choosenAttributes = getNodeXY(f);
             Coordonnee c = new Coordonnee(Double.parseDouble(choosenAttributes.getKey()), choosenAttributes.getValue().doubleValue());
-            XYChart.Data<String , Number> node = new XYChart.Data<>(choosenAttributes.getKey(), choosenAttributes.getValue());
+            XYChart.Data<String, Number> node = new XYChart.Data<>(choosenAttributes.getKey(), choosenAttributes.getValue());
             data.add(new Pair<>(node, f));
             series.getData().add(node);
         }
@@ -163,11 +166,11 @@ public class DataController {
         }
         return null;
     }
-    
+
     private Set<String> getAttributes() {
-       return  this.dataManager.getAttributes();
+        return this.dataManager.getAttributes();
     }
-    
+
     private void updateCategories() {
         xCategory.getItems().clear();
         yCategory.getItems().clear();
@@ -191,4 +194,13 @@ public class DataController {
         // TODO
     }
 
+    @Override
+    public void update(Observable<Data> ob) {
+        constructChart();
+    }
+
+    @Override
+    public void update(Observable<Data> ob, Data elt) {
+        constructChart();
+    }
 }
