@@ -1,4 +1,0 @@
-image: 3.9.9-sapmachine-21
-
-build:
-  script: "cd Application && mvn install -B"
