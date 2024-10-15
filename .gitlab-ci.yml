@@ -8,16 +8,18 @@ variables:
 
 # Define the stages of the CI/CD pipeline
 stages:
-  - build                    # Stage for building the application
+  - prepare_release                    # Stage for building the application
   - release                  # Stage for releasing the application
 
 # Job to build the Java application
-build:
-  stage: build
+prepare_release:
+  stage: prepare_release
   script:
+    - mkdir -p artifacts        # Change directory to the Application folder
     - cd Application  
     - mkdir -p artifacts        # Change directory to the Application folder
     - $MVN_CMD   
+    - cd ../
     - echo "JOB_ID=$CI_JOB_ID" > artifacts/job.env  
   after_script:
     - cat artifacts/job.env
@@ -33,7 +35,7 @@ release:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest  
   needs:
-    - job: build
+    - job: prepare_release
       artifacts: true
   script:
     - echo 'Running release job'
