@@ -53,6 +53,7 @@ public class DataManager<E extends Data> implements Observable<E> {
 
     public void loadData(String path) {
         try {
+            dataList = new ArrayList<>();
             List<FormatDonneeBrut> tmp = DataLoader.charger(path);
             for (FormatDonneeBrut f : tmp) {
                 dataList.add((E) FormatDonneeBrut.createObject(f));

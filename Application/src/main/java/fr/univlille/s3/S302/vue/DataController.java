@@ -214,9 +214,11 @@ public class DataController implements Observer<Data> {
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
             DataManager<Data> dataManager = DataManager.instance;
-            dataManager.loadData("test.csv");
+            dataManager.loadData(file.getAbsolutePath());
+            constructChart();
+            setChartStyle();
             updateCategories();
-            update();
+
         }
     }
 }

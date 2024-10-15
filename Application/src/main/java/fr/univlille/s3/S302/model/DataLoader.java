@@ -8,12 +8,23 @@ import java.util.List;
 
 public class DataLoader {
 
-    public static List<FormatDonneeBrut> charger(String fileName) throws IOException {
+    public static List<FormatDonneeBrut> charger(String fileName) throws FileNotFoundException {
+        System.out.println("Chargement du fichier " + fileName);
         InputStream input = DataLoader.class.getResourceAsStream(fileName);
         if (input == null) {
-            throw new FileNotFoundException("Fichier non trouvé");
+            if (new File(fileName).exists()) {
+                input = new FileInputStream(fileName);
+            } else {
+                throw new FileNotFoundException("Fichier non trouvé");
+            }
         }
 
+
+        return csvToList(input);
+
+    }
+
+    private static List<FormatDonneeBrut> csvToList(InputStream input) throws FileNotFoundException {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(input))) {
 
@@ -28,7 +39,6 @@ public class DataLoader {
             e.printStackTrace();
         }
         throw new FileNotFoundException("Fichier non trouvé");
-
     }
 
     public static Iris createObject(FormatDonneeBrut f) {
