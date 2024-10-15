@@ -1,33 +1,39 @@
 image: maven:3.6.3-openjdk-17
 
+# Define variables for Maven commands
 variables:
-  MVN_CMD: "mvn install -B"
+  MVN_CMD: "mvn install -B"  # Batch mode: no progress output
 
+# Cache Maven dependencies to speed up builds
 cache:
-  key: "$CI_COMMIT_REF_SLUG"
+  key: "$CI_COMMIT_REF_SLUG"  # Unique cache for each branch
+  paths:
+    - .m2/repository/         # Cache the local Maven repository
 
-
+# Define the stages of the CI/CD pipeline
 stages:
-  - build
-  - release
+  - build                    # Stage for building the application
+  - release                  # Stage for releasing the application
 
+# Job to build the Java application
 build:
   stage: build
   script:
-    - cd Application
-    - $MVN_CMD
+    - cd Application          # Change directory to the Application folder
+    - $MVN_CMD               # Execute the Maven install command
   artifacts:
     paths:
-      - "Application/target/Application-1.0-SNAPSHOT.jar"
-    expire_in: 1 week  # Set how long to keep artifacts
-    
+      - "Application/target/Application-1.0-SNAPSHOT.jar"  # Path to JAR file
+    expire_in: 1 week                                  # Keep artifacts for 1 week
+
+# Job to release the application when a Git tag is created
 release:
   stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  image: registry.gitlab.com/gitlab-org/release-cli:latest  # Use the release CLI for creating releases
   rules:
-    - if: $CI_COMMIT_TAG                 # Run this job when a tag is created
+    - if: $CI_COMMIT_TAG  # Run this job only when a tag is created
   script:
-    - echo "running release_job"
-  release:                               # See https://docs.gitlab.com/ee/ci/yaml/#release for available properties
-    tag_name: '$CI_COMMIT_TAG'
-    description: '$CI_COMMIT_TAG'
+    - echo 'Running release job'
+  release:  # Define the properties for the GitLab release
+    tag_name: '$CI_COMMIT_TAG'                  # Use the created Git tag as the release tag
+    description: 'Release for version: $CI_COMMIT_TAG'  # Set a description for the release
