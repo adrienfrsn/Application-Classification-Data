@@ -1,26 +1,53 @@
 image: maven:3.6.3-openjdk-17
 
+# Define variables for Maven commands
 variables:
-  MVN_CMD: "mvn install -B"
+  MVN_CMD: "mvn install -B"  # Batch mode: no progress output
 
-cache:
-  key: "$CI_COMMIT_REF_SLUG"
-  paths:
-    - .m2/repository/ # Cache Maven dependencies
 
+
+# Define the stages of the CI/CD pipeline
 stages:
-  - build
-  - release
+  - prepare_release                    # Stage for building the application
+  - release                  # Stage for releasing the application
 
-build:
-  stage: build
+# Job to build the Java application
+prepare_release:
+  stage: prepare_release
   script:
-    - cd Application
-    - $MVN_CMD
+    - mkdir -p artifacts        # Change directory to the Application folder
+    - cd Application  
+    - mkdir -p artifacts        # Change directory to the Application folder
+    - $MVN_CMD   
+    - cd ../
+    - echo "JOB_ID=$CI_JOB_ID" > artifacts/job.env  
+  after_script:
+    - cat artifacts/job.env
   artifacts:
-    expire_in: 1 week  # Set how long to keep artifacts
+    paths:
+      - artifacts/
+      - "Application/target/*.jar" 
+    expire_in: never
+    reports:
+      dotenv: artifacts/job.env                                # Keep artifacts for 1 week
 
+# Job to release the application when a Git tag is created
 release:
   stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest  
+  needs:
+    - job: prepare_release
+      artifacts: true
+  rules:
+    - if: $CI_COMMIT_TAG  # Run this job only when a tag is created
   script:
-    - echo "Releasing artifact..."
+    - echo 'Running release job'
+    - JOB_ID=$(cat artifacts/job.env)  # Read JOB_ID from job.env
+    - echo JOB_ID
+  release:  # Define the properties for the GitLab release
+    tag_name: '$CI_COMMIT_TAG'                  # Use the created Git tag as the release tag
+    description: 'Release for latest commit'  # Set a description for the release
+    assets:
+      links:
+        - name: 'app.jar'
+          url: '$CI_SERVER_URL/$CI_PROJECT_PATH/-/jobs/$JOB_ID/artifacts/download'
