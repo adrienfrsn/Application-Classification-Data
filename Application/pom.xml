@@ -28,13 +28,13 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>21</version>
-            <!-- <classifier>mac-aarch64</classifier> -->
+            <classifier>mac-aarch64</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>21</version>
-            <!-- <classifier>mac-aarch64</classifier> -->
+            <classifier>mac-aarch64</classifier>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -72,6 +72,7 @@
 
 
 
+
     </dependencies>
 
 
@@ -85,6 +86,7 @@
                     <release>11</release>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -95,7 +97,27 @@
                         <!-- Usage: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>fr.univlille.s3.S302.vue.App</mainClass>
+                            <mainClass>fr.univlille.s3.S302.Main</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>fr.univlille.s3.S302.Main</mainClass>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
