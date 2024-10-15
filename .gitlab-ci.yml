@@ -34,4 +34,4 @@ release:
     assets:
       links:
         - name: 'app.jar'
-          url: '$CI_SERVER_URL/$CI_PROJECT_PATH/-/jobs/$JOB_ID/artifacts/download'
+          url: '$CI_SERVER_URL/$CI_PROJECT_PATH/-/jobs/$CI_JOB_ID/artifacts/download'
