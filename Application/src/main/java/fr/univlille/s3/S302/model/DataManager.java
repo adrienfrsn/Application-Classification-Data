@@ -1,9 +1,12 @@
 package fr.univlille.s3.S302.model;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import javafx.stage.FileChooser;
 
 public class DataManager<E extends Data> implements Observable<E> {
     public static final String PATH = "iris.csv";

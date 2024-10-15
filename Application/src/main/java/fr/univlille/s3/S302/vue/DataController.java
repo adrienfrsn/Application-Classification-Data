@@ -11,9 +11,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.util.Pair;
 
+import java.io.File;
 import java.util.*;
 
 public class DataController implements Observer<Data> {
@@ -202,5 +204,19 @@ public class DataController implements Observer<Data> {
     @Override
     public void update(Observable<Data> ob, Data elt) {
         constructChart();
+    }
+
+    public void loadNewCsv() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Ouvrir un fichier CSV");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers CSV", "*.csv"));
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            DataManager<Data> dataManager = DataManager.instance;
+            dataManager.loadData("test.csv");
+            updateCategories();
+            update();
+        }
     }
 }
