@@ -29,5 +29,5 @@ release:
   script:
     - echo 'Running release job'
   release:  # Define the properties for the GitLab release
-    tag_name: '$CI_COMMIT_TAG'                  # Use the created Git tag as the release tag
-    description: 'Release for version: $CI_COMMIT_TAG'  # Set a description for the release
+    tag_name: 'alpha'                  # Use the created Git tag as the release tag
+    description: 'Release for latest commit'  # Set a description for the release
