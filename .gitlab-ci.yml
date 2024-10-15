@@ -4,11 +4,7 @@ image: maven:3.6.3-openjdk-17
 variables:
   MVN_CMD: "mvn install -B"  # Batch mode: no progress output
 
-# Cache Maven dependencies to speed up builds
-cache:
-  key: "$CI_COMMIT_REF_SLUG"  # Unique cache for each branch
-  paths:
-    - .m2/repository/         # Cache the local Maven repository
+
 
 # Define the stages of the CI/CD pipeline
 stages:
@@ -29,9 +25,7 @@ build:
 # Job to release the application when a Git tag is created
 release:
   stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest  # Use the release CLI for creating releases
-  rules:
-    - if: $CI_COMMIT_TAG  # Run this job only when a tag is created
+  image: registry.gitlab.com/gitlab-org/release-cli:latest  
   script:
     - echo 'Running release job'
   release:  # Define the properties for the GitLab release
