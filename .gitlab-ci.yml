@@ -19,7 +19,6 @@ build:
     - $MVN_CMD
   artifacts:
     paths:
-      - "*.jar"
-      - "Application/*.jar"
+      - "/root/.m2/repository/fr/univlille/s3/S302/Application/1.0-SNAPSHOT/*.jar"
     expire_in: 1 week  # Set how long to keep artifacts
 
