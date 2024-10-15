@@ -5,8 +5,7 @@ variables:
 
 cache:
   key: "$CI_COMMIT_REF_SLUG"
-  paths:
-    - .m2/repository/ # Cache Maven dependencies
+
 
 stages:
   - build
@@ -19,6 +18,6 @@ build:
     - $MVN_CMD
   artifacts:
     paths:
-      - ".m2/repository/fr/univlille/s3/S302/Application/1.0-SNAPSHOT/*.jar"
+      - "Application/target/Application-1.0-SNAPSHOT.jar"
     expire_in: 1 week  # Set how long to keep artifacts
 
