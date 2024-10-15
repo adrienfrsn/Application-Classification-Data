@@ -19,7 +19,7 @@ build:
     - $MVN_CMD               # Execute the Maven install command
   artifacts:
     paths:
-      - "Application/target/Application-1.0-SNAPSHOT.jar"  # Path to JAR file
+      - "Application/target/*.jar" 
     expire_in: 1 week                                  # Keep artifacts for 1 week
 
 # Job to release the application when a Git tag is created
@@ -31,3 +31,7 @@ release:
   release:  # Define the properties for the GitLab release
     tag_name: 'alpha'                  # Use the created Git tag as the release tag
     description: 'Release for latest commit'  # Set a description for the release
+    assets:
+      links:
+        - name: 'app.jar'
+          url: '$CI_SERVER_URL/$CI_PROJECT_PATH/-/jobs/$JOB_ID/artifacts/download'
