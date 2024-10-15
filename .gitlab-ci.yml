@@ -25,6 +25,7 @@ prepare_release:
     - cat artifacts/job.env
   artifacts:
     paths:
+      - artifacts/
       - "Application/target/*.jar" 
     expire_in: never
     reports:
