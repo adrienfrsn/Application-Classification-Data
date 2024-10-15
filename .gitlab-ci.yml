@@ -15,23 +15,34 @@ stages:
 build:
   stage: build
   script:
-    - cd Application          # Change directory to the Application folder
-    - $MVN_CMD               # Execute the Maven install command
+    - cd Application  
+    - mkdir -p artifacts        # Change directory to the Application folder
+    - $MVN_CMD   
+    - echo "JOB_ID=$CI_JOB_ID" > artifacts/job.env  
+  after_script:
+    - cat artifacts/job.env
   artifacts:
     paths:
       - "Application/target/*.jar" 
-    expire_in: 1 week                                  # Keep artifacts for 1 week
+    expire_in: never
+    reports:
+      dotenv: artifacts/job.env                                # Keep artifacts for 1 week
 
 # Job to release the application when a Git tag is created
 release:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest  
+  needs:
+    - job: build
+      artifacts: true
   script:
     - echo 'Running release job'
+    - JOB_ID=$(cat artifacts/job.env)  # Read JOB_ID from job.env
+    - echo JOB_ID
   release:  # Define the properties for the GitLab release
     tag_name: 'alpha'                  # Use the created Git tag as the release tag
     description: 'Release for latest commit'  # Set a description for the release
     assets:
       links:
         - name: 'app.jar'
-          url: '$CI_SERVER_URL/$CI_PROJECT_PATH/-/jobs/$CI_JOB_ID/artifacts/download'
+          url: '$CI_SERVER_URL/$CI_PROJECT_PATH/-/jobs/$JOB_ID/artifacts/download'
