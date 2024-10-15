@@ -218,7 +218,6 @@ public class DataController implements Observer<Data> {
             constructChart();
             setChartStyle();
             updateCategories();
-
         }
     }
 }

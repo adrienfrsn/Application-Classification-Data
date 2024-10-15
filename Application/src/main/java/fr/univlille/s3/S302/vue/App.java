@@ -8,6 +8,10 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+import atlantafx.base.theme.Dracula;
+import atlantafx.base.theme.PrimerLight;
+
+
 /**
  * JavaFX App
  */
@@ -16,6 +20,7 @@ public class App extends Application {
     private static Scene scene;
 
     static Parent loadFXML(String fxml) throws IOException {
+        Application.setUserAgentStylesheet(new Dracula().getUserAgentStylesheet());
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();
     }
@@ -33,8 +38,6 @@ public class App extends Application {
         scene = new Scene(loadFXML("UI"), 640, 480);
         stage.setScene(scene);
         stage.show();
-
-
     }
 
 }
