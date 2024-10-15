@@ -1,4 +1,26 @@
 image: maven:3.6.3-openjdk-17
 
+variables:
+  MVN_CMD: "mvn install -B"
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .m2/repository/ # Cache Maven dependencies
+
+stages:
+  - build
+  - release
+
 build:
-  script: "cd Application && mvn install -B"
+  stage: build
+  script:
+    - cd Application
+    - $MVN_CMD
+  artifacts:
+    expire_in: 1 week  # Set how long to keep artifacts
+
+release:
+  stage: release
+  script:
+    - echo "Releasing artifact..."
