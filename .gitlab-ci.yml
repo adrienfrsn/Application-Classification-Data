@@ -18,9 +18,8 @@ build:
     - cd Application
     - $MVN_CMD
   artifacts:
+    paths:
+      - "*.jar"
+      - "Application/*.jar"
     expire_in: 1 week  # Set how long to keep artifacts
 
-release:
-  stage: release
-  script:
-    - echo "Releasing artifact..."
