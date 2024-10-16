@@ -13,9 +13,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
+import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class DataController implements Observer<Data> {
@@ -23,12 +25,12 @@ public class DataController implements Observer<Data> {
 
     private final Map<String, String> categorieColor = new HashMap<>();
     @FXML
-    ScatterChart<String, Number> chart;
+    ScatterChart<Number, Number> chart;
     @FXML
     ComboBox<String> xCategory;
     @FXML
     ComboBox<String> yCategory;
-    List<Pair<XYChart.Data<String, Number>, Data>> data;
+    List<Pair<XYChart.Data<Number, Number>, Data>> data;
     DataManager<Data> dataManager = DataManager.instance;
     Pair<String, String> choosenAttributes;
     @FXML
@@ -48,14 +50,11 @@ public class DataController implements Observer<Data> {
                 choosenAttributes = new Pair<>(xCategory.getValue(), yCategory.getValue());
                 update();
 
-            } catch (IllegalArgumentException ile) {
+            } catch (IllegalArgumentException | NoSuchElementException ile) {
                 Popup popup = genErrorPopup(ile.getMessage());
                 popup.show(chart.getScene().getWindow());
 
 
-            } catch (NoSuchElementException nse) {
-                Popup popup = genErrorPopup(nse.getMessage());
-                popup.show(chart.getScene().getWindow());
             }
 
         });
@@ -107,8 +106,8 @@ public class DataController implements Observer<Data> {
     }
 
     private void setChartStyle() {
-        for (final XYChart.Series<String, Number> s : chart.getData()) {
-            for (final XYChart.Data<String, Number> data : s.getData()) {
+        for (final XYChart.Series<Number, Number> s : chart.getData()) {
+            for (final XYChart.Data<Number, Number> data : s.getData()) {
                 Data d = getNode(data);
                 Tooltip tooltip = new Tooltip();
                 tooltip.setText(d.getCategory() + "\n" + data.getXValue() + " : " + data.getYValue());
@@ -129,19 +128,19 @@ public class DataController implements Observer<Data> {
         }
     }
 
-    private Pair<String, Number> getNodeXY(Data f) {
+    private Pair<Number, Number> getNodeXY(Data f) {
         Map<String, Number> attributes = f.getattributes();
-        return new Pair<>(attributes.get(choosenAttributes.getKey()).toString(), attributes.get(choosenAttributes.getValue()));
+        return new Pair<>(attributes.get(choosenAttributes.getKey()), attributes.get(choosenAttributes.getValue()));
     }
 
     private void updateChart() {
         chart.getData().clear();
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        List<Pair<XYChart.Data<String, Number>, Data>> tmp = new ArrayList<>(this.data);
-        for (Pair<XYChart.Data<String, Number>, Data> d : tmp) {
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        List<Pair<XYChart.Data<Number, Number>, Data>> tmp = new ArrayList<>(this.data);
+        for (Pair<XYChart.Data<Number, Number>, Data> d : tmp) {
             Data f = d.getValue();
-            Pair<String, Number> choosenAttributes = getNodeXY(f);
-            XYChart.Data<String, Number> node = new XYChart.Data<>(choosenAttributes.getKey(), choosenAttributes.getValue());
+            Pair<Number, Number> choosenAttributes = getNodeXY(f);
+            XYChart.Data<Number, Number> node = new XYChart.Data<>(choosenAttributes.getKey(), choosenAttributes.getValue());
             series.getData().add(node);
             data.remove(d);
             data.add(new Pair<>(node, f));
@@ -152,20 +151,21 @@ public class DataController implements Observer<Data> {
     }
 
     private void constructChart() {
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
         chart.getData().clear();
         for (Data f : dataManager.getDataList()) {
-            Pair<String, Number> choosenAttributes = getNodeXY(f);
-            Coordonnee c = new Coordonnee(Double.parseDouble(choosenAttributes.getKey()), choosenAttributes.getValue().doubleValue());
-            XYChart.Data<String, Number> node = new XYChart.Data<>(choosenAttributes.getKey(), choosenAttributes.getValue());
+            Pair<Number, Number> choosenAttributes = getNodeXY(f);
+            Coordonnee c = new Coordonnee(choosenAttributes.getKey().doubleValue(), choosenAttributes.getValue().doubleValue());
+            XYChart.Data<Number, Number> node = new XYChart.Data<>(choosenAttributes.getKey(), choosenAttributes.getValue());
             data.add(new Pair<>(node, f));
             series.getData().add(node);
         }
         chart.getData().add(series);
+
     }
 
-    private Data getNode(XYChart.Data<String, Number> data) {
-        for (Pair<XYChart.Data<String, Number>, Data> d : this.data) {
+    private Data getNode(XYChart.Data<Number, Number> data) {
+        for (Pair<XYChart.Data<Number, Number>, Data> d : this.data) {
             if (d.getKey() == data) {
                 return d.getValue();
             }
@@ -203,11 +203,13 @@ public class DataController implements Observer<Data> {
     @Override
     public void update(Observable<Data> ob) {
         constructChart();
+        setChartStyle();
     }
 
     @Override
     public void update(Observable<Data> ob, Data elt) {
         constructChart();
+        setChartStyle();
     }
 
     public void loadNewCsv() {
@@ -221,5 +223,11 @@ public class DataController implements Observer<Data> {
             dataManager.loadData(file.getAbsolutePath());
             buildWidgets();
         }
+    }
+
+    public void openNewWindow() throws IOException {
+        App app = new App();
+        app.start(new Stage());
+
     }
 }
