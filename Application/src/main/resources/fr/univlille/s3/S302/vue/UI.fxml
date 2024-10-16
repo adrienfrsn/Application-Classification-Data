@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.univlille.s3.S302.vue.DataController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.univlille.s3.S302.vue.DataController">
    <left>
       <VBox prefHeight="400.0" prefWidth="150.0" BorderPane.alignment="CENTER">
          <children>
@@ -60,7 +60,7 @@
    <center>
       <ScatterChart fx:id="chart" BorderPane.alignment="CENTER">
         <xAxis>
-          <CategoryAxis side="BOTTOM" />
+          <NumberAxis side="BOTTOM" />
         </xAxis>
         <yAxis>
           <NumberAxis side="LEFT" />
@@ -75,6 +75,11 @@
               <MenuItem mnemonicParsing="false" onAction="#loadNewCsv" text="Charger un CSV" />
             </items>
           </Menu>
+            <Menu mnemonicParsing="false" text="Edit">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#openNewWindow" text="Nouvelle fenetre" />
+              </items>
+            </Menu>
         </menus>
       </MenuBar>
    </top>
