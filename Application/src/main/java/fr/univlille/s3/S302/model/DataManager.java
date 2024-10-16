@@ -58,6 +58,7 @@ public class DataManager<E extends Data> implements Observable<E> {
             for (FormatDonneeBrut f : tmp) {
                 dataList.add((E) FormatDonneeBrut.createObject(f));
             }
+            notifyAllObservers();
 
         } catch (IOException e) {
             e.printStackTrace();
