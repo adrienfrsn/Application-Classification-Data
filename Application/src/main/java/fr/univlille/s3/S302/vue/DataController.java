@@ -39,6 +39,31 @@ public class DataController implements Observer<Data> {
     @FXML
     public void initialize() {
 
+        buildWidgets();
+
+        categoryBtn.setOnAction(event -> {
+            try {
+                chart.getXAxis().setLabel(xCategory.getValue());
+                chart.getYAxis().setLabel(yCategory.getValue());
+                choosenAttributes = new Pair<>(xCategory.getValue(), yCategory.getValue());
+                update();
+
+            } catch (IllegalArgumentException ile) {
+                Popup popup = genErrorPopup(ile.getMessage());
+                popup.show(chart.getScene().getWindow());
+
+
+            } catch (NoSuchElementException nse) {
+                Popup popup = genErrorPopup(nse.getMessage());
+                popup.show(chart.getScene().getWindow());
+            }
+
+        });
+
+
+    }
+
+    private void buildWidgets() {
         data = new ArrayList<>();
         categorieColor.put("Unknown", "black");
 
@@ -63,27 +88,6 @@ public class DataController implements Observer<Data> {
         constructChart();
 
         setChartStyle();
-
-        categoryBtn.setOnAction(event -> {
-            try {
-                chart.getXAxis().setLabel(xCategory.getValue());
-                chart.getYAxis().setLabel(yCategory.getValue());
-                choosenAttributes = new Pair<>(xCategory.getValue(), yCategory.getValue());
-                update();
-
-            } catch (IllegalArgumentException ile) {
-                Popup popup = genErrorPopup(ile.getMessage());
-                popup.show(chart.getScene().getWindow());
-
-
-            } catch (NoSuchElementException nse) {
-                Popup popup = genErrorPopup(nse.getMessage());
-                popup.show(chart.getScene().getWindow());
-            }
-
-        });
-
-
     }
 
     private Popup genErrorPopup(String message) {
@@ -215,9 +219,7 @@ public class DataController implements Observer<Data> {
         if (file != null) {
             DataManager<Data> dataManager = DataManager.instance;
             dataManager.loadData(file.getAbsolutePath());
-            constructChart();
-            setChartStyle();
-            updateCategories();
+            buildWidgets();
         }
     }
 }
