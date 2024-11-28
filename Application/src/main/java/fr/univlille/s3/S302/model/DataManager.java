@@ -3,185 +3,90 @@ package fr.univlille.s3.S302.model;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-import fr.univlille.s3.S302.utils.Observable;
-import fr.univlille.s3.S302.utils.Observer;
+import fr.univlille.s3.S302.utils.Distance;
+import fr.univlille.s3.S302.utils.ModelUtils;
+import javafx.util.Pair;
 
-public class DataManager<E extends Data> implements Observable<E> {
+/**
+ * Classe permettant de gérer les données et de les manipuler.
+ * Elle permet de charger des données, de les ajouter, de les supprimer, de les catégoriser, de les afficher, de les sauvegarder, etc.
+ * Elle permet également de gérer les données utilisateurs.
+ * Elle est un singleton.
+ * @param <E> le type de données à gérer
+ */
+public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Observable {
 
     public static final String PATH = "iris.csv";
-    public static DataManager<Data> instance = new DataManager<>();
+
+    private final Map<String, Pair<Number, Number>> minMax = new HashMap<>();
+
+    private static final int DEFAULT_NB_VOISIN = 3;
+    private static DataManager<Data> instance;
+
+    private final List<E> userData;
+    private final DataColorManager colorManager;
+
     private List<E> dataList;
-    private List<Observer> observers;
-    private List<E> UserData;
-    private Map<String, String> colorMap;
-    private static int idxColor = 0;
+    private int bestNbVoisin = DEFAULT_NB_VOISIN;
 
     /**
-     * Constructeur de la classe DataManager
-     * 
-     * @param dataList la liste des données
+     * Retourne l'instance de DataManager.
+     * @return l'instance de DataManager
      */
-    public DataManager(List<E> dataList) {
+    public static DataManager<Data> getInstance() {
+        if (instance == null) {
+            instance = new DataManager<>();
+        }
+        return instance;
+    }
+
+    /**
+     * Constructeur de DataManager.
+     * @param dataList la liste de données à gérer
+     */
+    private DataManager(List<E> dataList) {
+        super();
+        instance = (DataManager<Data>) this;
         this.dataList = dataList;
-        this.observers = new ArrayList<>();
-        this.UserData = new ArrayList<>();
+        this.userData = new ArrayList<>();
+        this.colorManager = new DataColorManager();
     }
 
     /**
-     * Constructeur de la classe DataManager
+     * Constructeur de DataManager.
+     * @param path le chemin du fichier à charger
      */
-    public DataManager() {
+    private DataManager(String path) {
         this(new ArrayList<>());
-        this.loadData(PATH);
-    }
-
-    public static void main(String[] args) {
-        DataManager<FormatDonneeBrut> dataManager = new DataManager<>();
-        dataManager.loadData(PATH);
-        System.out.println(dataManager.getDataList());
-    }
-
-    public List<Observer> getObservers() {
-        return observers;
+        this.loadData(path);
     }
 
     /**
-     * @return la liste des données
+     * Constructeur de DataManager avec un fichier à charger par défaut.
+     */
+    private DataManager() {
+        this(PATH);
+    }
+    /**
+     * @return la liste de données utilisateurs
+     */
+    public List<E> getUserDataList() {
+        return userData;
+    }
+    /**
+     * @return la liste de données
      */
     public List<E> getDataList() {
         return dataList;
     }
 
-    /**
-     * @param dataList la nouvelle liste des données
-     */
-    public void setDataList(List<E> dataList) {
-        this.dataList = dataList;
+    public int getBestNbVoisin() {
+        return bestNbVoisin;
     }
 
     /**
-     * Ajoute une donnée à la liste des données
-     * 
-     * @param data la donnée à ajouter
+     * @return le nombre de catégories différentes dans les données
      */
-    public void addData(E data) {
-        dataList.add(data);
-        notifyAllObservers();
-    }
-
-    /**
-     * Supprime une donnée de la liste des données
-     * 
-     * @param data la donnée à supprimer
-     */
-    public void removeData(E data) {
-        dataList.remove(data);
-    }
-
-    /**
-     * @return les attributs des données
-     */
-    public Set<String> getAttributes() {
-        return dataList.get(0).getattributes().keySet();
-    }
-
-    /**
-     * Charge les données à partir d'un fichier
-     * 
-     * @param path le chemin du fichier
-     */
-    public void loadData(String path) {
-        try {
-            dataList = new ArrayList<>();
-            List<FormatDonneeBrut> tmp = DataLoader.charger(path);
-            for (FormatDonneeBrut f : tmp) {
-                dataList.add((E) FormatDonneeBrut.createObject(f));
-            }
-            notifyAllObservers();
-
-        } catch (FileNotFoundException | NullPointerException e) {
-            System.out.println("Fichier non trouvé");
-        }
-    }
-
-    /**
-     * Ajoute un observateur
-     */
-    @Override
-    public void attach(Observer<E> ob) {
-        this.observers.add(ob);
-    }
-
-    /**
-     * Notifie tous les observateurs et update l'observateur avec l'élément
-     */
-    @Override
-    public void notifyAllObservers(E elt) {
-        ArrayList tmp = new ArrayList<>(this.observers);
-        for (Object ob : tmp) {
-            if (ob instanceof Observer)
-                ((Observer<E>) ob).update(this, elt);
-        }
-    }
-
-    /**
-     * Notifie tous les observateurs et update l'observateur
-     */
-    @Override
-    public void notifyAllObservers() {
-        ArrayList tmp = new ArrayList<>(this.observers);
-        for (Object ob : tmp) {
-            if (ob instanceof Observer)
-                ((Observer<E>) ob).update(this);
-        }
-    }
-
-    public void AddUserData(E e){
-        UserData.add(e);
-    }
-
-    public List<E> getUserDataList(){
-        return this.UserData;
-    }
-    public void addData(Map<String,Number> map){
-        ArrayList<String> alist=new ArrayList<>(map.keySet());
-        alist.sort(Comparator.naturalOrder());
-        double Att0=map.get(alist.get(0)).doubleValue();
-        double Att1=map.get(alist.get(1)).doubleValue();
-        double Att2=map.get(alist.get(2)).doubleValue();
-        double Att3=map.get(alist.get(3)).doubleValue();
-        Iris tmpiris=new Iris(Att2,Att3,Att0,Att1,"Unknown");
-        this.UserData.add((E)tmpiris);
-        notifyAllObservers();
-    }
-
-    public void createColor() {
-        colorMap = new HashMap<>();
-        int nbCategories = getNbCategories();
-        if (nbCategories % 3 == 0 && nbCategories > 0) {
-            int step = 255 / (nbCategories / 3);
-            int r = 255;
-            int g = 0;
-            int b = 0;
-            for (int i = 0; i < nbCategories; i++) {
-                colorMap.put("Color" + i, "rgb(" + r + "," + g + "," + b + ")");
-                if (r == 255 && g < 255 && b == 0) {
-                    g += step;
-                } else if (r > 0 && g == 255 && b == 0) {
-                    r -= step;
-                } else if (r == 0 && g == 255 && b < 255) {
-                    b += step;
-                } else if (r == 0 && g > 0 && b == 255) {
-                    g -= step;
-                } else if (r < 255 && g == 0 && b == 255) {
-                    r += step;
-                } else if (r == 255 && g == 0 && b > 0) {
-                    b -= step;
-                }
-            }
-        }
-    }
-
     private int getNbCategories() {
         Set<String> categories = new HashSet<>();
         for (Data d : dataList) {
@@ -190,50 +95,219 @@ public class DataManager<E extends Data> implements Observable<E> {
         return categories.size();
     }
 
-    public String nextColor() {
-        if (colorMap == null) {
-            createColor();
-        }
-        String color = colorMap.get("Color" + idxColor);
-        idxColor = (idxColor + 1) % getNbCategories();
-        return color;
+    public Number getMax(String attribute) {
+        return minMax.get(attribute).getValue();
     }
 
-    public void categorizeData() {
-        for (Data d : UserData) {
-            if (d.getCategory().equals("Unknown")) {
-                Data nearestData = getNearestData(d);
-                d.setCategory(nearestData.getCategory());
+    public Number getMin(String attribute) {
+        return minMax.get(attribute).getKey();
+    }
+
+    public void updateMinMax(String attribute, Number nb) {
+        if (!minMax.containsKey(attribute)) {
+            minMax.put(attribute, new Pair<>(nb, nb));
+        } else {
+            if (nb.doubleValue() > minMax.get(attribute).getValue().doubleValue()) {
+                minMax.put(attribute, new Pair<>(minMax.get(attribute).getKey(), nb));
+            }
+            if (nb.doubleValue() < minMax.get(attribute).getKey().doubleValue()) {
+                minMax.put(attribute, new Pair<>(nb, minMax.get(attribute).getValue()));
+            }
+        }
+    }
+
+    /**
+     * Ajoute une donnée à la liste de données.
+     */
+    public void addData(E data) {
+        dataList.add(data);
+        notifyAllObservers();
+    }
+
+    /**
+     * Supprime une donnée de la liste de données.
+     */
+    public void removeData(E data) {
+        dataList.remove(data);
+        notifyAllObservers();
+    }
+
+    /**
+     * Ajoute une donnée que l'utilisateur a rentrée.
+     * @param e La map correspondant aux attributs du point que l'on veut ajouter
+     */
+    public void addUserData(E e) {
+        userData.add(e);
+        notifyAllObservers();
+    }
+
+    /**
+     * Ajoute des données contenues dans une map.
+     * @param map La map correspondant aux attributs du point que l'on veut ajouter
+     */
+    @SuppressWarnings("unchecked")
+    public void addUserData(Map<String, Number> map) {
+        Data tmp = new FakeData(map, dataList.get(0).getCategoryField());
+        userData.add((E) tmp);
+        notifyAllObservers();
+    }
+
+    /**
+     * @param data La data dont on veut determiner si elle est une data creé par l'utilisateur
+     * @return un boolean indiquant si la donnée en paramètre est une donnée ajoutée par l'utilisateur
+     */
+    @SuppressWarnings("SuspiciousMethodCalls")
+    public boolean isUserData(Data data) {
+        return userData.contains(data);
+    }
+
+    /**
+     * @return un Set avec les attributs des données
+     */
+    public Set<String> getAttributes() {
+        if (dataList.isEmpty()) {
+            return new HashSet<>();
+        }
+        return dataList.get(0).getAttributes().keySet();
+    }
+
+    public void reset() {
+        this.dataList.clear();
+        this.userData.clear();
+        notifyAllObservers();
+    }
+
+    /**
+     * Charge les données du fichier spécifié dans DataManager
+     * @param path chemin vers le fichier à charger
+     */
+    @SuppressWarnings("unchecked")
+    public void loadData(String path) {
+        try {
+            dataList = new ArrayList<>();
+            List<? extends Data> tmp = DataLoader.charger(path);
+            for (Data f : tmp) {
+                f.makeData();
+                for (String key : f.getAttributes().keySet()) {
+                    updateMinMax(key, f.getAttributes().get(key));
+                }
+                dataList.add((E) f);
+            }
+            Data.updateDataTypes(dataList.get(0));
+            notifyAllObservers();
+
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Change le champ de catégorie des données.
+     * @param newCategoryField Le champ a utilisé commme catégorie
+     */
+    public void changeCategoryField(String newCategoryField) {
+        for (Data d : dataList) {
+            d.setCategoryField(newCategoryField);
+        }
+        for (Data d : userData) {
+            d.setCategoryField(newCategoryField);
+        }
+        notifyAllObservers();
+    }
+
+    /**
+     * Categorise les données utilisateurs selon la distance souhaitée.
+     * @param distanceSouhaitee La méthode de calcul de la distance
+     */
+    public void categorizeData(Distance distanceSouhaitee) {
+        for (Data d : userData) {
+            if (userDataIsNotCategorized(d)) {
+                List<Data> nearestData = getNearestDatas(d, distanceSouhaitee, bestNbVoisin);
+                Map<String, Integer> categories = new HashMap<>();
+                for (Data data : nearestData) {
+                    categories.put(data.getCategory(), categories.getOrDefault(data.getCategory(), 0) + 1);
+                }
+                d.setCategory(Collections.max(categories.entrySet(), Map.Entry.comparingByValue()).getKey());
             }
         }
         notifyAllObservers();
     }
 
-    public Data getNearestData(Data data) {
-        double minDistance = Double.MAX_VALUE;
-        Data nearestData = null;
-        for (Data d : dataList) {
-            double distance = euclideanDistance(data, d);
-            if (distance < minDistance) {
-                minDistance = distance;
-                nearestData = d;
+    private static boolean userDataIsNotCategorized(Data userData) {
+        if (userData == null) {
+            throw new IllegalArgumentException("userDataIsNotCategorized : userData ne peut pas être nul ");
+        }
+        return userData.getCategory().equals("Unknown");
+    }
+
+    /**
+     * Devine la catégorie d'une donnée selon les attributs donnés et la distance souhaitée.
+     * @param guessAttributes La map correspondant aux attributs du point duquel il faut determiner la catégorie
+     * @param distanceSouhaitee La méthode de calcul de la distance
+     * @return La catégorie devinée
+     */
+    public String guessCategory(Map<String, Number> guessAttributes, Distance distanceSouhaitee) {
+        Data n = new FakeData(guessAttributes, dataList.get(0).getCategoryField());
+        List<Data> nearestData = getNearestDatas(n, distanceSouhaitee, bestNbVoisin);
+        Map<String, Integer> categories = new HashMap<>();
+        for (Data d : nearestData) {
+            categories.put(d.getCategory(), categories.getOrDefault(d.getCategory(), 0) + 1);
+        }
+        return Collections.max(categories.entrySet(), Map.Entry.comparingByValue()).getKey();
+    }
+
+    /**
+     * Cherche les données les n plus proche de la donnée en paramètre.
+     * @param data la donnée
+     * @param distanceSouhaitee la distance souhaitée
+     * @param nbVoisin le nombre de voisins a considerer
+     * @return une liste de données
+     */
+    public List<Data> getNearestDatas(Data data, Distance distanceSouhaitee, int nbVoisin) {
+        List<Data> nearestData = new ArrayList<>();
+        List<Data> tmp = new ArrayList<>(dataList);
+
+        for (int i = 0; i < nbVoisin; i++) {
+            Data nearest = tmp.get(0);
+            double minDistance = Data.distance(data, nearest, distanceSouhaitee);
+            for (Data d : tmp) {
+                double distance = Data.distance(data, d, distanceSouhaitee);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearest = d;
+                }
             }
+            nearestData.add(nearest);
+            tmp.remove(nearest);
         }
         return nearestData;
     }
 
-    private double euclideanDistance(Data d1, Data d2) {
-        double distance = 0;
-        Map<String, Number> attributes1 = d1.getattributes();
-        Map<String, Number> attributes2 = d2.getattributes();
-        for (String attribute : attributes1.keySet()) {
-            double diff = attributes1.get(attribute).doubleValue() - attributes2.get(attribute).doubleValue();
-            distance += diff * diff;
-        }
-        return Math.sqrt(distance);
+    public static double valueOf(String attribute, String value) {
+        return Data.valueOf(attribute, value);
     }
 
-    public boolean isUserData(Data d){
-        return UserData.contains(d);
+    public String nextColor() {
+        return colorManager.nextColor(getNbCategories());
     }
+
+    public void createColor() {
+        colorManager.nextColor(getNbCategories());
+    }
+
+    @SuppressWarnings("unchecked")
+    public double getBestNbVoisin(Distance d, String path, String targetField) throws FileNotFoundException {
+        List<E> listetest= (List<E>) DataLoader.charger(path);
+        for (Data da : listetest) {
+            da.makeData();
+        }
+        for (Data da : listetest) {
+            da.setCategoryField(targetField);
+        }
+        Pair<Integer,Double> p = ModelUtils.Robustesse((DataManager<Data>) this, (List<Data>) listetest,d);
+        this.bestNbVoisin = p.getKey();
+        return p.getValue();
+    }
+
+
 }
