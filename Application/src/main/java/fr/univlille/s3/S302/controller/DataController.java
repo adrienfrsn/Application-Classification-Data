@@ -13,6 +13,8 @@ import fr.univlille.s3.S302.view.App;
 import fr.univlille.s3.S302.view.Chart;
 import fr.univlille.s3.S302.view.HeatView;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
@@ -30,6 +32,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.imageio.ImageIO;
 import javafx.embed.swing.SwingFXUtils;
@@ -70,28 +73,41 @@ public class DataController extends Observer {
     Label pRobustesse;
     @FXML
     Label nbVoisin;
+    @FXML
+    TextField nbVoisinField;
+
     private HeatView heatView;
     @FXML
     ComboBox<String> cateCombo;
+    @FXML
+    ProgressIndicator loading;
 
     /**
      * Initialisation de la fenêtre
      */
     public void initialize() {
-        chartController = new Chart(this.chart);
-        distanceComboBox.setValue("Euclidienne");
-        distanceComboBox.setItems(FXCollections.observableArrayList("Euclidienne", "Manhattan", "Euclidienne normalisée", "Manhattan normalisée"));
-        cateCombo.getItems().addAll(dataManager.getAttributes());
-        cateCombo.setValue(dataManager.getDataList().get(0).getCategoryField());
-        nbVoisin.setText(dataManager.getBestNbVoisin() + " Voisins");
+        setDefaultValues();
         buildWidgets();
         constructVBox();
+        setEvents();
+    }
+
+    private void setDefaultValues() {
+        chartController = new Chart(this.chart);
+        loading.setVisible(false);
+        distanceComboBox.setValue("Euclidienne");
+        distanceComboBox.setItems(FXCollections.observableArrayList("Euclidienne", "Manhattan",
+                "Euclidienne normalisée", "Manhattan normalisée"));
+        cateCombo.getItems().addAll(dataManager.getAttributes());
+        cateCombo.setValue(dataManager.getDataList().get(0).getCategoryField());
+        nbVoisinField.setText(dataManager.getBestNbVoisin() + "");
+    }
+
+    private void setEvents() {
         categoryBtn.setOnAction(event -> {
             try {
                 updateAxisCategory();
                 update();
-                this.heatView = recreateHeatView();
-                this.heatView.update();
             } catch (IllegalArgumentException | NoSuchElementException ile) {
                 Popup popup = genErrorPopup(ile.getMessage());
                 popup.show(chart.getScene().getWindow());
@@ -102,16 +118,17 @@ public class DataController extends Observer {
             addUserPoint();
         });
 
-        heatView = new HeatView(canvas, chart, xCategory.getValue(), yCategory.getValue(), chartController.categorieColor, defaultDistance);
+        heatView = new HeatView(canvas, chart, xCategory.getValue(), yCategory.getValue(),
+                chartController.categorieColor, defaultDistance);
         chart.widthProperty().addListener((obs, oldVal, newVal) -> {
             canvas.setWidth(newVal.doubleValue());
             canvas.setHeight(chart.getHeight());
-            heatView.update();
+            update();
         });
         chart.heightProperty().addListener((obs, oldVal, newVal) -> {
             canvas.setHeight(newVal.doubleValue());
             canvas.setWidth(chart.getWidth());
-            heatView.update();
+            update();
         });
 
         cateCombo.setOnAction(event -> {
@@ -169,7 +186,9 @@ public class DataController extends Observer {
                     tmp.put(s, DataManager.valueOf(s, labelMap.get(s).getText()));
                 }
             }
-            dataManager.addUserData(tmp);
+            if (!tmp.isEmpty()) {
+                dataManager.addUserData(tmp);
+            }
         } catch (NumberFormatException e) {
             DataController.genErrorPopup("Entrez valeurs valides").show(addPointVBox.getScene().getWindow());
         }
@@ -214,22 +233,9 @@ public class DataController extends Observer {
             ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
             System.out.println("Image saved; path: " + file.getAbsolutePath());
         } catch (IOException e) {
+            genErrorPopup("Erreur lors de la sauvegarde de l'image").show(chart.getScene().getWindow());
             System.err.println("An error occurred while saving the image");
         }
-    }
-
-    /**
-     * Recrée la heatview
-     *
-     * @return la nouvelle heatview
-     */
-    private HeatView recreateHeatView() {
-        boolean heatViewActive = heatView.isActive();
-        HeatView tmp = new HeatView(canvas, chart, xCategory.getValue(), yCategory.getValue(), chartController.categorieColor, defaultDistance);
-        if (heatViewActive) {
-            tmp.toggle();
-        }
-        return tmp;
     }
 
     /**
@@ -261,6 +267,7 @@ public class DataController extends Observer {
         boolean heatViewActive = false;
         if (heatView != null) {
             heatViewActive = heatView.isActive();
+            heatView.destroy();
             this.heatView = null;
         }
 
@@ -274,7 +281,8 @@ public class DataController extends Observer {
         updateAxisCategory();
         chartController.recreateChart(dataManager.getDataList(), dataManager.getUserDataList(), choosenAttributes);
 
-        this.heatView = new HeatView(canvas, chart, xCategory.getValue(), yCategory.getValue(), chartController.categorieColor, defaultDistance);
+        this.heatView = new HeatView(canvas, chart, xCategory.getValue(), yCategory.getValue(),
+                chartController.categorieColor, defaultDistance);
         if (heatViewActive) {
             this.heatView.toggle();
         }
@@ -311,7 +319,6 @@ public class DataController extends Observer {
         rebuild();
         constructVBox();
     }
-
 
     /**
      * Récupère les attributs
@@ -372,7 +379,7 @@ public class DataController extends Observer {
         fileChooser.setTitle("Ouvrir un fichier CSV");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers CSV", "*.csv"));
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        return  fileChooser.showOpenDialog(null);
+        return fileChooser.showOpenDialog(null);
     }
 
     /**
@@ -430,21 +437,70 @@ public class DataController extends Observer {
     /**
      * Met à jour les labels de robustesse
      */
-    public void updateRobustesseLabels()  {
+    public void updateRobustesseLabels() {
 
-        double percent;
+        AtomicReference<Double> percent = new AtomicReference<>((double) 0);
+
+        String path = getCsv().getPath();
+        loading.setVisible(true);
+        Service<Double> service = new Service<Double>() {
+            @Override
+            protected Task<Double> createTask() {
+                return new Task<Double>() {
+                    @Override
+                    protected Double call() throws Exception {
+                        loading.setProgress(-1);
+                        return dataManager.getBestNbVoisin(defaultDistance, path, cateCombo.getValue());
+                    }
+                };
+            }
+        };
+        service.setOnSucceeded(e -> {
+            percent.set(service.getValue());
+            // pRobustesse.setVisible(true);
+            // nbVoisin.setVisible(true);
+            pRobustesse.setText("Taux : " + (percent.get() * 100) + " %");
+            nbVoisinField.setText(dataManager.getBestNbVoisin() + "");
+            loading.setVisible(false);
+        });
+        service.start();
+    }
+
+    /**
+     * Déclenche la validation croisée
+     */
+    public void triggerCrossValidation() {
+        AtomicReference<Double> percent = new AtomicReference<>((double) 0);
+
+        loading.setVisible(true);
+        Service<Double> service = new Service<Double>() {
+            @Override
+            protected Task<Double> createTask() {
+                return new Task<Double>() {
+                    @Override
+                    protected Double call() throws Exception {
+                        loading.setProgress(-1);
+                        return dataManager.validationCroisee(defaultDistance, cateCombo.getValue());
+                    }
+                };
+            }
+        };
+        service.setOnSucceeded(e -> {
+            percent.set(service.getValue());
+            // pRobustesse.setVisible(true);
+            // nbVoisin.setVisible(true);
+            pRobustesse.setText("Taux : " + (percent.get() * 100) + " %");
+            nbVoisinField.setText(dataManager.getBestNbVoisin() + "");
+            loading.setVisible(false);
+        });
+        service.start();
+    }
+
+    public void changeNbVoisin() {
         try {
-            percent = dataManager.getBestNbVoisin(defaultDistance,getCsv().getPath(), cateCombo.getValue());
-        } catch (FileNotFoundException e) {
-            genErrorPopup("Erreur lors du chargement du fichier").show(chart.getScene().getWindow());
-            throw new RuntimeException(e);
-        } catch (NullPointerException e) {
-            genErrorPopup("Aucun fichier selectionné").show(chart.getScene().getWindow());
-            throw new RuntimeException(e);
+            dataManager.setBestNbVoisin(Integer.parseInt(nbVoisinField.getText()));
+        } catch (NumberFormatException e) {
+            genErrorPopup("Entrez un nombre valide").show(nbVoisinField.getScene().getWindow());
         }
-        pRobustesse.setVisible(true);
-        nbVoisin.setVisible(true);
-        pRobustesse.setText((percent *100) + " %");
-        nbVoisin.setText(dataManager.getBestNbVoisin() + " Voisins");
     }
 }

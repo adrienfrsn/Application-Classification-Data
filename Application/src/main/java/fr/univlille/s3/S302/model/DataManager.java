@@ -1,17 +1,22 @@
 package fr.univlille.s3.S302.model;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
+import fr.univlille.s3.S302.model.data.FakeData;
+import fr.univlille.s3.S302.model.data.FakeDataValidation;
 import fr.univlille.s3.S302.utils.Distance;
 import fr.univlille.s3.S302.utils.ModelUtils;
 import javafx.util.Pair;
 
 /**
  * Classe permettant de gérer les données et de les manipuler.
- * Elle permet de charger des données, de les ajouter, de les supprimer, de les catégoriser, de les afficher, de les sauvegarder, etc.
+ * Elle permet de charger des données, de les ajouter, de les supprimer, de les
+ * catégoriser, de les afficher, de les sauvegarder, etc.
  * Elle permet également de gérer les données utilisateurs.
  * Elle est un singleton.
+ * 
  * @param <E> le type de données à gérer
  */
 public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Observable {
@@ -31,6 +36,7 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
 
     /**
      * Retourne l'instance de DataManager.
+     * 
      * @return l'instance de DataManager
      */
     public static DataManager<Data> getInstance() {
@@ -42,6 +48,7 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
 
     /**
      * Constructeur de DataManager.
+     * 
      * @param dataList la liste de données à gérer
      */
     private DataManager(List<E> dataList) {
@@ -54,6 +61,7 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
 
     /**
      * Constructeur de DataManager.
+     * 
      * @param path le chemin du fichier à charger
      */
     private DataManager(String path) {
@@ -67,12 +75,14 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
     private DataManager() {
         this(PATH);
     }
+
     /**
      * @return la liste de données utilisateurs
      */
     public List<E> getUserDataList() {
         return userData;
     }
+
     /**
      * @return la liste de données
      */
@@ -134,6 +144,7 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
 
     /**
      * Ajoute une donnée que l'utilisateur a rentrée.
+     * 
      * @param e La map correspondant aux attributs du point que l'on veut ajouter
      */
     public void addUserData(E e) {
@@ -143,18 +154,22 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
 
     /**
      * Ajoute des données contenues dans une map.
+     * 
      * @param map La map correspondant aux attributs du point que l'on veut ajouter
      */
     @SuppressWarnings("unchecked")
     public void addUserData(Map<String, Number> map) {
         Data tmp = new FakeData(map, dataList.get(0).getCategoryField());
+        tmp.setCategoryField(dataList.get(0).getCategoryField());
         userData.add((E) tmp);
         notifyAllObservers();
     }
 
     /**
-     * @param data La data dont on veut determiner si elle est une data creé par l'utilisateur
-     * @return un boolean indiquant si la donnée en paramètre est une donnée ajoutée par l'utilisateur
+     * @param data La data dont on veut determiner si elle est une data creé par
+     *             l'utilisateur
+     * @return un boolean indiquant si la donnée en paramètre est une donnée ajoutée
+     *         par l'utilisateur
      */
     @SuppressWarnings("SuspiciousMethodCalls")
     public boolean isUserData(Data data) {
@@ -179,11 +194,13 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
 
     /**
      * Charge les données du fichier spécifié dans DataManager
+     * 
      * @param path chemin vers le fichier à charger
      */
     @SuppressWarnings("unchecked")
     public void loadData(String path) {
         try {
+            minMax.clear();
             dataList = new ArrayList<>();
             List<? extends Data> tmp = DataLoader.charger(path);
             for (Data f : tmp) {
@@ -197,12 +214,15 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
             notifyAllObservers();
 
         } catch (FileNotFoundException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Fichier introuvable : " + path, e);
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors du chargement des données", e);
         }
     }
 
     /**
      * Change le champ de catégorie des données.
+     * 
      * @param newCategoryField Le champ a utilisé commme catégorie
      */
     public void changeCategoryField(String newCategoryField) {
@@ -217,6 +237,7 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
 
     /**
      * Categorise les données utilisateurs selon la distance souhaitée.
+     * 
      * @param distanceSouhaitee La méthode de calcul de la distance
      */
     public void categorizeData(Distance distanceSouhaitee) {
@@ -225,7 +246,10 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
                 List<Data> nearestData = getNearestDatas(d, distanceSouhaitee, bestNbVoisin);
                 Map<String, Integer> categories = new HashMap<>();
                 for (Data data : nearestData) {
-                    categories.put(data.getCategory(), categories.getOrDefault(data.getCategory(), 0) + 1);
+                    String category = data.getCategory();
+                    if (category != null) {
+                        categories.put(category, categories.getOrDefault(category, 0) + 1);
+                    }
                 }
                 d.setCategory(Collections.max(categories.entrySet(), Map.Entry.comparingByValue()).getKey());
             }
@@ -237,12 +261,16 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
         if (userData == null) {
             throw new IllegalArgumentException("userDataIsNotCategorized : userData ne peut pas être nul ");
         }
-        return userData.getCategory().equals("Unknown");
+        String category = userData.getCategory();
+        return category == null || category.equals("Unknown");
     }
 
     /**
-     * Devine la catégorie d'une donnée selon les attributs donnés et la distance souhaitée.
-     * @param guessAttributes La map correspondant aux attributs du point duquel il faut determiner la catégorie
+     * Devine la catégorie d'une donnée selon les attributs donnés et la distance
+     * souhaitée.
+     * 
+     * @param guessAttributes   La map correspondant aux attributs du point duquel
+     *                          il faut determiner la catégorie
      * @param distanceSouhaitee La méthode de calcul de la distance
      * @return La catégorie devinée
      */
@@ -258,29 +286,46 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
 
     /**
      * Cherche les données les n plus proche de la donnée en paramètre.
-     * @param data la donnée
+     * 
+     * @param data              la donnée
      * @param distanceSouhaitee la distance souhaitée
-     * @param nbVoisin le nombre de voisins a considerer
+     * @param nbVoisin          le nombre de voisins a considerer
      * @return une liste de données
      */
     public List<Data> getNearestDatas(Data data, Distance distanceSouhaitee, int nbVoisin) {
-        List<Data> nearestData = new ArrayList<>();
-        List<Data> tmp = new ArrayList<>(dataList);
+        PriorityQueue<DataDistance> maxHeap = new PriorityQueue<>((a, b) -> Double.compare(b.distance, a.distance));
 
-        for (int i = 0; i < nbVoisin; i++) {
-            Data nearest = tmp.get(0);
-            double minDistance = Data.distance(data, nearest, distanceSouhaitee);
-            for (Data d : tmp) {
-                double distance = Data.distance(data, d, distanceSouhaitee);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    nearest = d;
-                }
+        // Calculer les distances et garder seulement les 'nbVoisin' plus proches
+        for (Data d : dataList) {
+            double distance = Data.distance(data, d, distanceSouhaitee);
+
+            if (maxHeap.size() < nbVoisin) {
+                maxHeap.offer(new DataDistance(d, distance));
+            } else if (distance < maxHeap.peek().distance) {
+                maxHeap.poll();
+                maxHeap.offer(new DataDistance(d, distance));
             }
-            nearestData.add(nearest);
-            tmp.remove(nearest);
         }
+
+        // Extraire les données du maxHeap
+        List<Data> nearestData = new ArrayList<>(maxHeap.size());
+        while (!maxHeap.isEmpty()) {
+            nearestData.add(maxHeap.poll().data);
+        }
+
+        // Renvoyer la liste des données les plus proches
         return nearestData;
+    }
+
+    // Classe interne pour stocker une donnée et sa distance
+    private static class DataDistance {
+        Data data;
+        double distance;
+
+        DataDistance(Data data, double distance) {
+            this.data = data;
+            this.distance = distance;
+        }
     }
 
     public static double valueOf(String attribute, String value) {
@@ -297,17 +342,92 @@ public class DataManager<E extends Data> extends fr.univlille.s3.S302.utils.Obse
 
     @SuppressWarnings("unchecked")
     public double getBestNbVoisin(Distance d, String path, String targetField) throws FileNotFoundException {
-        List<E> listetest= (List<E>) DataLoader.charger(path);
+        List<E> listetest = (List<E>) DataLoader.charger(path);
         for (Data da : listetest) {
             da.makeData();
-        }
-        for (Data da : listetest) {
             da.setCategoryField(targetField);
         }
-        Pair<Integer,Double> p = ModelUtils.Robustesse((DataManager<Data>) this, (List<Data>) listetest,d);
+        Pair<Integer, Double> p = ModelUtils.Robustesse((DataManager<Data>) this, (List<Data>) listetest, d);
         this.bestNbVoisin = p.getKey();
         return p.getValue();
     }
 
+    public void setBestNbVoisin(int nb) {
+        this.bestNbVoisin = nb;
+        notifyAllObservers();
+    }
+
+    public double validationCroisee(Distance d, String targetField) {
+        List<Data> originalDataList = new ArrayList<>(dataList);
+        List<FakeDataValidation> validationList = prepareValidationData(targetField);
+
+        Collections.shuffle(validationList);
+        System.out.println("Validation croisée en cours...");
+        List<List<FakeDataValidation>> subsets = createSubsets(validationList, 10);
+        System.out.println("Subsets created");
+
+        double averageScore = performCrossValidation(d, subsets);
+
+        dataList = (List<E>) new ArrayList<>(originalDataList); // Restore original data list
+        return averageScore;
+    }
+
+    private List<FakeDataValidation> prepareValidationData(String targetField) {
+        List<FakeDataValidation> validationData = new ArrayList<>();
+
+        for (Data data : dataList) {
+            FakeDataValidation fakeData = new FakeDataValidation(data.getAttributes(), targetField, data.getCategory());
+            fakeData.setCategoryField(targetField);
+            validationData.add(fakeData);
+        }
+
+        return validationData;
+    }
+
+    private List<List<FakeDataValidation>> createSubsets(List<FakeDataValidation> validationList, int subdivisions) {
+        List<List<FakeDataValidation>> subsets = new ArrayList<>();
+
+        for (int i = 0; i < subdivisions; i++) {
+            subsets.add(new ArrayList<>());
+        }
+
+        for (int i = 0; i < validationList.size(); i++) {
+            subsets.get(i % subdivisions).add(validationList.get(i));
+        }
+
+        return subsets;
+    }
+
+    private double performCrossValidation(Distance d, List<List<FakeDataValidation>> subsets) {
+        double totalScore = 0;
+        Map<Integer, Integer> neighborCount = new HashMap<>();
+
+        for (int i = 0; i < subsets.size(); i++) {
+            List<FakeDataValidation> testSet = subsets.get(i);
+            List<Data> trainingSet = createTrainingSet(subsets, i);
+
+            dataList = (List<E>) new ArrayList<>(trainingSet); // Update dataList to use the training set
+            Pair<Integer, Double> result = ModelUtils.Robustesse((DataManager<Data>) this, new ArrayList<>(testSet), d);
+
+            neighborCount.put(result.getKey(), neighborCount.getOrDefault(result.getKey(), 0) + 1);
+            totalScore += result.getValue();
+        }
+
+        bestNbVoisin = Collections.max(neighborCount.entrySet(), Map.Entry.comparingByValue()).getKey();
+
+        return totalScore / subsets.size(); // Calculate average score
+    }
+
+    private List<Data> createTrainingSet(List<List<FakeDataValidation>> subsets, int testIndex) {
+        List<Data> trainingSet = new ArrayList<>();
+
+        for (int j = 0; j < subsets.size(); j++) {
+            if (j != testIndex) {
+                trainingSet.addAll(subsets.get(j));
+            }
+        }
+
+        return trainingSet;
+    }
 
 }

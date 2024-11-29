@@ -1,7 +1,7 @@
 package fr.univlille.s3.S302.utils;
 
 import fr.univlille.s3.S302.model.Data;
-import fr.univlille.s3.S302.model.FakeData;
+import fr.univlille.s3.S302.model.data.FakeData;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DistanceManhattanTest {
+public class TestDistanceManhattan {
     @Test
     public void testDistanceManhattan() {
         DistanceManhattan distance = new DistanceManhattan();

@@ -20,6 +20,7 @@ public class DataColorManager {
 
     /**
      * Méthode permettant de récupérer la couleur suivante
+     * 
      * @param nbCategories le nombre de catégories
      * @return la couleur suivante
      */
@@ -32,8 +33,13 @@ public class DataColorManager {
         return color;
     }
 
+    protected Map<String, String> getColorMap() {
+        return colorMap;
+    }
+
     /**
      * Méthode permettant de créer les couleurs
+     * 
      * @param nbCategories le nombre de catégories
      */
     private void createColor(int nbCategories) {
@@ -42,7 +48,7 @@ public class DataColorManager {
         while (nbColor <= nbCategories || nbColor % 3 != 0) {
             nbColor++;
         }
-        int step, r = 0, g = 0, b = 0;
+        int step = 0, r = 0, g = 0, b = 0;
         for (int i = 0; i < nbColor; i++) {
             switch (i % 3) {
                 case 0:

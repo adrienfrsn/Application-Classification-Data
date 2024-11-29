@@ -16,11 +16,9 @@ public class Chart {
 
     public final Map<String, String> categorieColor = new HashMap<>();
 
-
     List<Pair<XYChart.Data<Number, Number>, Data>> data;
 
     DataManager dataManager = DataManager.getInstance();
-
 
     public Chart(ScatterChart<Number, Number> chart) {
         this.chart = chart;
@@ -28,7 +26,7 @@ public class Chart {
         chart.getXAxis().setAutoRanging(true);
         chart.getYAxis().setAutoRanging(true);
         chart.setAnimated(false);
-        //chart.legendVisibleProperty().setValue(false);
+        // chart.legendVisibleProperty().setValue(false);
     }
 
     public void recreateChart(List<Data> dataList, List<Data> userDataList, Pair<String, String> choosenAttributes) {
@@ -45,23 +43,22 @@ public class Chart {
             addPoint(f, series, choosenAttributes);
         }
         for (Data f : dataList) {
-            if (f.getAttributes().containsKey(choosenAttributes.getKey())
-                    && f.getAttributes().containsKey(choosenAttributes.getValue())) {
-                addPoint(f, series , choosenAttributes);
+            if (f.getAttributes().getOrDefault(choosenAttributes.getKey(),null) != null
+                    && f.getAttributes().getOrDefault(choosenAttributes.getValue(), null) != null) {
+                addPoint(f, series, choosenAttributes);
             }
 
         }
         for (Data f : userDataList) {
-            if (f.getAttributes().containsKey(choosenAttributes.getKey())
-                    && f.getAttributes().containsKey(choosenAttributes.getValue())) {
-                addPoint(f, series , choosenAttributes);
+            if (f.getAttributes().getOrDefault(choosenAttributes.getKey(),null) != null
+                    && f.getAttributes().getOrDefault(choosenAttributes.getValue(), null) != null) {
+                addPoint(f, series, choosenAttributes);
             }
 
         }
         chart.getData().add(series);
         setChartStyle();
     }
-
 
     private void addPoint(Data f, XYChart.Series<Number, Number> series, Pair<String, String> choosenAttributes) {
         Pair<Number, Number> valueChoosenAttr = getNodeXY(f, choosenAttributes);
@@ -100,7 +97,20 @@ public class Chart {
 
     private static void attachInfoTooltip(XYChart.Data<Number, Number> data, Data d) {
         Tooltip tooltip = new Tooltip();
-        tooltip.setText(d.getCategoryField() + ":" + d.getCategory() + "\n" + data.getXValue() + " : " + data.getYValue());
+        StringBuilder text = new StringBuilder();
+        text.append("Catégorie: \n");
+        text.append(d.getCategoryField()).append(":").append(d.getCategory());
+        text.append("\nAttributs: ");
+        for (Map.Entry<String, Number> entry : d.getAttributes().entrySet()) {
+            try {
+                String tmp = d.getValue(entry.getKey(), entry.getValue());
+                text.append("\n").append(entry.getKey()).append(":").append(tmp);
+            } catch (Exception e) {
+
+            }
+
+        }
+        tooltip.setText(text.toString());
         tooltip.setShowDuration(javafx.util.Duration.seconds(10));
         tooltip.setShowDelay(javafx.util.Duration.seconds(0));
         Tooltip.install(data.getNode(), tooltip);
@@ -123,7 +133,6 @@ public class Chart {
     private void createColor() {
         dataManager.createColor();
     }
-
 
     private Data getNode(XYChart.Data<Number, Number> data) {
         for (Pair<XYChart.Data<Number, Number>, Data> d : this.data) {
